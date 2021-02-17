@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 
+import datetime
 from functools import partial
-from datetime import datetime
+
 
 import ipyvuetify as v
 from traitlets import (
@@ -213,7 +214,7 @@ class Alert(v.Alert, SepalWidget):
             self
         """
         
-        current_time = datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
+        current_time = datetime.datetime.now().strftime("%Y/%m/%d, %H:%M:%S")
 
         self.show()
         self.type = type_ if (type_ in TYPES) else TYPES[0]

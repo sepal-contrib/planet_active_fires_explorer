@@ -35,34 +35,34 @@ class PlanetKey:
         
         return any(active)
 
-    def build_request(aoi_geom, start_date, stop_date, cloud_cover=100):
-        """build a data api search request for PS imagery.
+def build_request(aoi_geom, start_date, stop_date, cloud_cover=100):
+    """build a data api search request for PS imagery.
 
-        Args:
-            aoi_geom (geojson): 
-            start_date (datetime.datetime)
-            stop_date (datetime.datetime)
+    Args:
+        aoi_geom (geojson): 
+        start_date (datetime.datetime)
+        stop_date (datetime.datetime)
 
-        Returns:
-            Request
-        """
-    
-        query = filters.and_filter(
-            filters.geom_filter(aoi_geom),
-            filters.range_filter('cloud_cover', lte=cloud_cover),
-            filters.date_range('acquired', gt=start_date),
-            filters.date_range('acquired', lt=stop_date)
-        )
+    Returns:
+        Request
+    """
 
-        # Skipping REScene because is not orthorrectified and 
-        # cannot be clipped.
+    query = filters.and_filter(
+        filters.geom_filter(aoi_geom),
+        filters.range_filter('cloud_cover', lte=cloud_cover),
+        filters.date_range('acquired', gt=start_date),
+        filters.date_range('acquired', lt=stop_date)
+    )
 
-        return filters.build_search_request(query, [
-            'PSScene3Band', 
-            'PSScene4Band', 
-            'PSOrthoTile',
-            'REOrthoTile',
-        ])
+    # Skipping REScene because is not orthorrectified and 
+    # cannot be clipped.
+
+    return filters.build_search_request(query, [
+        'PSScene3Band', 
+        'PSScene4Band', 
+        'PSOrthoTile',
+        'REOrthoTile',
+    ])
 
 def get_items(id_name, request, client):
     """ Get items using the request with the given parameters
