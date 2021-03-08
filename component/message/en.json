@@ -23,6 +23,8 @@
         "alert_number" : "There are {} fire alerts in the last {}.",
         "clipping" : "Clipping alerts to area of interest...",
         "insert_api" : "Insert Planet API key",
-        "aoi_method" : "AOI method"        
+        "no_key" : "Wrong Planet API Key." ,
+        "no_latlon" : "Get alerts or click over any place in map." ,
+        "aoi_method" : "AOI method"
     }
 }

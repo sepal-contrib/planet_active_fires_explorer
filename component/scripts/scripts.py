@@ -34,6 +34,22 @@ class PlanetKey:
         if subs: active = [True for sub in subs if sub['state'] == 'active']
         
         return any(active)
+    
+def validate_api_event(self, widget, change, data, alert):
+
+    api_key = self.w_api_key.v_model
+
+    planet_key = PlanetKey(api_key)
+    self.client = planet_key.client()
+
+    self.valid_api = planet_key.is_active()
+
+    if self.valid_api:
+        self.w_api_alert.add_msg(cm.ui.success_api.msg, cm.ui.success_api.type)
+        self._toggle_planet_setts(on=True)
+    else:
+        self.w_api_alert.add_msg(cm.ui.fail_api.msg, cm.ui.fail_api.type)
+        self._toggle_planet_setts(on=False)
 
 def build_request(aoi_geom, start_date, stop_date, cloud_cover=100):
     """build a data api search request for PS imagery.
