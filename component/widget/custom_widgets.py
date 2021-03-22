@@ -6,7 +6,7 @@ from functools import partial
 import ipyvuetify as v
 from traitlets import (
     Unicode, observe, directional_link, 
-    List, Int, Bool, Any
+    List, Int, Bool, Any, link
 )
 
 from sepal_ui.sepalwidgets.sepalwidget import SepalWidget, TYPES
@@ -408,7 +408,7 @@ class StateBar(v.SystemBar):
         
         return self
     
-class DynamicSelect(v.Flex):
+class DynamicSelect(v.Card):
     
     """ Widget to navigate with next and previous buttons over a list
     
@@ -434,7 +434,6 @@ class DynamicSelect(v.Flex):
     def __init__(self, label='', **kwargs):
         
         self.class_='d-flex align-center mb-2'
-        self.disabled = True
         self.row=True
         self.label = label
         
@@ -487,3 +486,65 @@ class DynamicSelect(v.Flex):
         elif widget._metadata['name']=='previous':
             if position > 0:
                 self.w_list.v_model = self.w_list.items[position-1]
+                
+class Tooltip(v.Tooltip):
+    
+    def __init__(self, widget, tooltip, *args, **kwargs):
+        """
+        Custom widget to display tooltip when mouse is over widget
+
+        Args:
+            widget (DOM.widget): widget used to display tooltip
+            tooltip (str): the text to display in the tooltip
+            
+        Example:
+            
+            btn = v.Btn(children=['Button'])
+            Tooltip(widget=btn, tooltip='Click over the button')
+        """
+        
+        self.bottom=True
+        self.v_slots=[{
+            'name': 'activator',
+            'variable': 'tooltip',
+            'children': widget
+        }]
+        widget.v_on = 'tooltip.on'
+        
+        self.children = [tooltip]
+        
+        super().__init__(*args, **kwargs)
+        
+    def __setattr__(self, name, value):
+        """prevent set attributes after instantiate tooltip class"""
+        
+        if hasattr(self,'_model_id'):
+            if self._model_id:
+                raise RuntimeError(f"You can't modify the attributes of the {self.__class__} after instantiated")
+        super().__setattr__(name, value)
+        
+class Tabs(v.Card):
+    
+    current = Int(0).tag(sync=True)
+    
+    def __init__(self, titles, content, **kwargs):
+        
+        self.background_color="primary"
+        self.dark = True
+        
+        self.tabs = [v.Tabs(v_model=self.current, children=[
+            v.Tab(children=[title], key=key) for key, title in enumerate(titles)
+        ])]
+        
+        self.content = [v.TabsItems(
+            v_model=self.current, 
+            children=[
+                v.TabItem(children=[content], key=key) for key, content in enumerate(content)
+            ]
+        )]
+        
+        self.children= self.tabs + self.content
+        
+        link((self.tabs[0], 'v_model'),(self.content[0], 'v_model'))
+        
+        super().__init__(**kwargs)
