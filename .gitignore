@@ -5,6 +5,7 @@ __pycache__/
 *.zip
 *999*
 *Untitled*
+FAO*
 # C extensions
 *.so
 
