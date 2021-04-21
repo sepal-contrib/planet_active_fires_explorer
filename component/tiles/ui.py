@@ -90,10 +90,14 @@ class UI(v.Layout):
     def filter_confidence(self, change):
         """Filter alert list by confidence"""
         
-        confidence = change['new'].lower()
+        confidence = change['new']
+        # Restart previous selected indexes
+        self.w_alerts.v_model = ''
         
         if confidence != 'All':
-            self.w_alerts.items = self.aoi_alerts[self.aoi_alerts.confidence==confidence].index.to_list()
+            self.w_alerts.items = self.aoi_alerts[self.aoi_alerts.confidence==confidence.lower()].index.to_list()
+        else:
+            self.w_alerts.items = self.aoi_alerts.index.to_list()
 
     def _get_metadata(self, alert_id):
         """Awful way to get a metadata table of alert and display it 
