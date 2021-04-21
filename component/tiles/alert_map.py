@@ -1,7 +1,10 @@
 from sepal_ui import mapping as m
 from ipywidgets import Button, Layout, Output
 from ipyleaflet import WidgetControl, FullScreenControl
-from ..widget.custom_widgets import StateBar
+
+from sepal_ui import sepalwidgets as sw
+from ..message import cm
+from ..widget.custom_widgets import *
 
 class AlertMap(m.SepalMap):
     

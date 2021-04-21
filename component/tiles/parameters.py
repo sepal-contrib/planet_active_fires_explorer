@@ -1,14 +1,14 @@
 import json
+import geopandas as gpd
+from traitlets import Int, Unicode, link
 from ipyleaflet import GeoJSON
+import ipyvuetify as v
 
-from traitlets import (
-    Int, Unicode, link
-)
-
+from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
-import ..message as cm
-from ..widget.custom_widgets import *
+from ..message import cm
 from ..scripts.scripts import *
+from ..widget.custom_widgets import *
 
 
 COUNTRIES = gpd.read_file('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
@@ -136,6 +136,8 @@ class PlanetParameters(v.Card):
         
         super().__init__(**kwargs)
         
+        self.valid_api = False
+        self.client = None
         
         self.w_api_alert = Alert(children=[cm.ui.default_api], type_='info').show()
         
