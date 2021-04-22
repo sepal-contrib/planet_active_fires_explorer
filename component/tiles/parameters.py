@@ -1,7 +1,6 @@
-import json
 import geopandas as gpd
+
 from traitlets import Int, Unicode, link
-from ipyleaflet import GeoJSON
 import ipyvuetify as v
 
 from sepal_ui import sepalwidgets as sw
@@ -10,25 +9,19 @@ from ..message import cm
 from ..scripts.scripts import *
 from ..widget.custom_widgets import *
 
-
 COUNTRIES = gpd.read_file('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
 
-class Parameters(v.Card):
+class Parameters(v.Card, sw.SepalWidget):
     
     TIME_SPAN = ['24 hours', '48 hours', '7 days']
     timespan = Unicode('24 hours').tag(sync=True)
     
-    def __init__(self, map_, **kwargs):
+    def __init__(self, **kwargs):
         
         self.class_='pa-2 mb-2'
-        self.map_ = map_
         
         super().__init__(**kwargs)
-        
-        # Class parameters
-        
-        self.aoi = None
-        
+                
         self.w_alert = Alert()
         
         self.w_spantime = v.Select(
@@ -52,12 +45,7 @@ class Parameters(v.Card):
         self.w_run = sw.Btn("Get Alerts")
         
         su.hide_component(self.w_countries)
-        
-        self.map_.dc.on_draw(self.handle_draw)
 
-        self.w_countries.observe(self.add_country_event, 'v_model')
-        self.w_aoi_method.observe(self.aoi_method_event, 'v_model')
-        
         self.children = [
             v.CardTitle(children=['Alerts settings']),
             self.w_spantime,
@@ -68,62 +56,9 @@ class Parameters(v.Card):
         ]
         
         link((self.w_spantime, 'v_model'),(self, 'timespan'))
-        
-    def add_country_event(self, change):
-        
-        self.map_.remove_layers()
-        
-        country_df = COUNTRIES[COUNTRIES['name']==change['new']]
-        geometry =  country_df.iloc[0].geometry
-        
-        lon, lat = [xy[0] for xy in geometry.centroid.xy]
-        
-        data = json.loads(country_df.to_json())
-        
-        aoi = GeoJSON(data=data,
-                      name=change['new'], 
-                     style={
-                         'color': 'green',
-                         'fillOpacity': 0, 
-                         'weight': 3
-                     }
-                )
-            
-        self.aoi = aoi.data['features'][0]['geometry']
-        
-        min_lon, min_lat, max_lon, max_lat = geometry.bounds
 
-        # Get (x, y) of the 4 cardinal points
-        tl = (max_lat, min_lon)
-        bl = (min_lat, min_lon)
-        tr = (max_lat, max_lon)
-        br = (min_lat, max_lon)
-        
-        self.map_.zoom_bounds([tl,bl, tr, br])
-        self.map_.center = (lat, lon)
-        self.map_.add_layer(aoi)
-        
-    def aoi_method_event(self, change):
-        
-        self.map_.remove_layers()
-        
-        if change['new'] == 'Select country':
-            self.map_.hide_dc()
-            su.show_component(self.w_countries)
 
-        else:
-            su.hide_component(self.w_countries)
-            self.map_.show_dc()
-            
-            
-    def handle_draw(self, target, action, geo_json):
-        
-        self.map_.remove_layers()
-        if action == 'created':
-            self.aoi = geo_json['geometry']
-            
-            
-class PlanetParameters(v.Card):
+class PlanetParameters(v.Card, sw.SepalWidget):
     
     cloud_cover = Int(20).tag(sync=True)
     days_before = Int(0).tag(sync=True)

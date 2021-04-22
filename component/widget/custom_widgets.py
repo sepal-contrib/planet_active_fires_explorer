@@ -9,9 +9,13 @@ from traitlets import (
     List, Int, Bool, Any, link
 )
 
+from sepal_ui.sepalwidgets import SepalWidget
 from sepal_ui.sepalwidgets.sepalwidget import SepalWidget, TYPES
 from sepal_ui.frontend.styles import sepal_darker
 
+class Card(v.Card, SepalWidget):
+    def __init__(self, *args,**kwargs):
+        super().__init__(*args, **kwargs)
     
 class DynamicSelect(v.Card):
     
