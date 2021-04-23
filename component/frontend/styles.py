@@ -19,6 +19,10 @@ div.jp-OutputArea-output {
     box-shadow: none !important;
 }
 
+.theme--dark.v-application {
+    background: none !important;
+}
+
 </style>
 """
 
