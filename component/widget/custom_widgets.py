@@ -43,7 +43,7 @@ class DynamicSelect(v.Card):
     
     def __init__(self, label='', **kwargs):
         
-        self.class_='d-flex align-center mb-2'
+        self.class_='d-flex align-center px-2'
         self.row=True
         self.label = label
         

@@ -17,9 +17,7 @@ class Parameters(v.Card, sw.SepalWidget):
     timespan = Unicode('24 hours').tag(sync=True)
     
     def __init__(self, **kwargs):
-        
-        self.class_='pa-2 mb-2'
-        
+                
         super().__init__(**kwargs)
                 
         self.w_alert = Alert()
@@ -66,9 +64,7 @@ class PlanetParameters(v.Card, sw.SepalWidget):
     api_key = Unicode('').tag(sync=True)
     
     def __init__(self, **kwargs):
-        
-        class_='pa-2'
-        
+                
         super().__init__(**kwargs)
         
         self.valid_api = False

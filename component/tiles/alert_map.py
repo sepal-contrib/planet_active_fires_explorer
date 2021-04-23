@@ -27,6 +27,7 @@ class AlertMap(m.SepalMap):
     def __init__(self, parameters, planet_parameters, *args, **kwargs):
         
         
+        
         self.root_dir, self.data_dir = self._workspace()
         
         self.param = parameters
@@ -86,6 +87,7 @@ class AlertMap(m.SepalMap):
                 
         self.close_param = v.Icon(children=['mdi-close'])
         self.w_parameters = Card(
+            class_='px-2',
             children=[
                 v.CardTitle(children=['Settings', v.Spacer(),self.close_param]),
                 v.Flex(class_='d-flex',children=[
@@ -97,9 +99,11 @@ class AlertMap(m.SepalMap):
         )
         
         parameters_control = WidgetControl(widget=self.w_parameters, position='bottomright', transparent_bg=True)
-        self.add_control(parameters_control)        
+        self.controls  = tuple([parameters_control] + [c for c in self.controls])
         
         self.w_alerts = DynamicSelect(disabled=True)
+        alerts_control = WidgetControl(widget=self.w_alerts, position='topright', transparent_bg=True)
+        self.controls  = tuple([alerts_control] + [c for c in self.controls])
         
         self.parameters_btn.on_click(self.toggle_param_visualization)
         self.dc.on_draw(self.handle_draw)
