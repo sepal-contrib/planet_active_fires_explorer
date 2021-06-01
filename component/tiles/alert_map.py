@@ -56,40 +56,68 @@ class AlertMap(m.SepalMap):
             disabled=False,
             tooltip='Reload Planet imagery',
             icon='refresh',
-            layout=Layout(width='30px', height='30px', line_height='30px', padding='0px')
+            layout=Layout(
+                width='30px', 
+                height='30px', 
+                line_height='30px', 
+                padding='0px'
+            )
         )
         
         # Create output space for metadata
         self.metadata_output = Output()
         
         # Add metadata_output as WidgetControl to the map
-        metadata_control = WidgetControl(widget=self.metadata_output, position='bottomright', transparent_bg=True)
+        metadata_control = WidgetControl(
+            widget=self.metadata_output, 
+            position='bottomright', 
+            transparent_bg=True)
         self.add_control(metadata_control)
         
         # Add controls in this way to make the new one as first in the list
-        self.controls = tuple([WidgetControl(widget=self.reload_btn, position='topright', transparent_bg=True)] + 
-            [c for c in self.controls])
+        self.controls = tuple([
+                WidgetControl(
+                    widget=self.reload_btn, 
+                    position='topright', 
+                    transparent_bg=True
+                )] + 
+            [c for c in self.controls]
+        )
         
         self.w_state_bar = StateBar(loading=False)
         
         # Add controls in this way to make the new one as first in the list
-        self.controls = tuple([WidgetControl(widget=self.w_state_bar)]+[c for c in self.controls])
+        self.controls = tuple([
+            WidgetControl(
+                widget=self.w_state_bar)]+[c for c in self.controls]
+        )
         
         # Add fires and planet parameters
         
         self.parameters_btn = Button(
             tooltip='Toggle parameters',
             icon='navicon',
-            layout=Layout(width='30px', height='30px', line_height='30px', padding='0px')
+            layout=Layout(
+                width='30px', 
+                height='30px', 
+                line_height='30px', 
+                padding='0px'
+            )
         )
-        options_control = WidgetControl(widget=self.parameters_btn, position='topleft', transparent_bt=True)
+        options_control = WidgetControl(
+            widget=self.parameters_btn, 
+            position='topleft', 
+            transparent_bt=True
+        )
+        
         self.add_control(options_control)
                 
         self.close_param = v.Icon(children=['mdi-close'])
         self.w_parameters = Card(
             class_='px-2',
             children=[
-                v.CardTitle(children=['Settings', v.Spacer(),self.close_param]),
+                v.CardTitle(
+                    children=['Settings', v.Spacer(),self.close_param]),
                 v.Flex(class_='d-flex',children=[
                     self.planet_param,
                     v.Divider(vertical=True, class_='mx-4'),
@@ -98,7 +126,11 @@ class AlertMap(m.SepalMap):
             ]
         )
         
-        parameters_control = WidgetControl(widget=self.w_parameters, position='bottomright', transparent_bg=True)
+        parameters_control = WidgetControl(
+            widget=self.w_parameters, 
+            position='bottomright', 
+            transparent_bg=True
+        )
         self.controls  = tuple([parameters_control] + [c for c in self.controls])
         
         self.w_alerts = DynamicSelect(disabled=True)
