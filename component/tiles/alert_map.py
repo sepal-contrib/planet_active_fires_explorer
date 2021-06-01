@@ -192,15 +192,9 @@ class AlertMap(m.SepalMap):
             
         self.aoi = aoi.data['features'][0]['geometry']
         
-        min_lon, min_lat, max_lon, max_lat = geometry.bounds
+        minx, miny, maxx, maxy = geometry.bounds
 
-        # Get (x, y) of the 4 cardinal points
-        tl = (max_lat, min_lon)
-        bl = (min_lat, min_lon)
-        tr = (max_lat, max_lon)
-        br = (min_lat, max_lon)
-        
-        self.zoom_bounds([tl,bl, tr, br])
+        self.zoom_bounds(bounds)
         self.center = (lat, lon)
         self.add_layer(aoi)
         
