@@ -192,7 +192,7 @@ class AlertMap(m.SepalMap):
             
         self.aoi = aoi.data['features'][0]['geometry']
         
-        minx, miny, maxx, maxy = geometry.bounds
+        bounds = geometry.bounds
 
         self.zoom_bounds(bounds)
         self.center = (lat, lon)
