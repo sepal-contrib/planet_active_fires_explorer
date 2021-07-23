@@ -290,12 +290,17 @@ class AlertMap(m.SepalMap):
         geom = json.loads(dumps(Point(self.lon, self.lat).buffer(0.001, cap_style=3)))
         
         # Get the current year/month/day
-        now = datetime.datetime.now(tz=pytz.timezone('UTC'))
+        #now = datetime.datetime.now(tz=pytz.timezone('UTC'))
         
-        days_before = ([x[1] for x in list(zip(self.param.TIME_SPAN,[1,2,7],)) if self.param.timespan == x[0]])[0]
-        days_before += self.planet_param.days_before
+        #now = datetime.datetime(2020, 12, 31, 0, 0, 0, 0, pytz.UTC)
+        #start_date = datetime.datetime(2020, 1, 1, 0, 0, 0, 0, pytz.UTC)
+        
+        now = datetime.datetime.strptime(self.acqdate, '%Y-%m-%d')
+        #days_before = ([x[1] for x in list(zip(self.param.TIME_SPAN,[1,2,7],)) if self.param.timespan == x[0]])[0]
+        days_before = self.planet_param.days_before
+        future = now+datetime.timedelta(days=days_before)
         start_date = now-datetime.timedelta(days=days_before)
-        req = build_request(geom, start_date, now, cloud_cover=self.planet_param.cloud_cover/100)
+        req = build_request(geom, start_date, future, cloud_cover=self.planet_param.cloud_cover/100)
         items = get_items('Alert', req, self.planet_param.client)
         
         return items
@@ -384,6 +389,7 @@ class AlertMap(m.SepalMap):
         
         self.lat = self.aoi_alerts.loc[self.current_alert]['latitude']
         self.lon = self.aoi_alerts.loc[self.current_alert]['longitude']
+        self.acqdate = self.aoi_alerts.loc[self.current_alert]['acq_date']
         
         self.center=((self.lat,self.lon))
         self.zoom=15
@@ -418,9 +424,15 @@ class AlertMap(m.SepalMap):
         }
         
         sat = satellites[satellite]
-        timespan = self.param.timespan.replace(' hours', 'h').replace(' days','d')
+        if self.param.timespan=='Historic':
+            #print(self.param.input_file.v_model)
+            url=Path(self.param.input_file.v_model)
+            
+        else:
+            timespan = self.param.timespan.replace(' hours', 'h').replace(' days','d')
+            url=f"https://firms.modaps.eosdis.nasa.gov/data/active_fire/{sat[1]}/csv/{sat[0]}_Global_{timespan}.csv"
+            
         
-        url=f"https://firms.modaps.eosdis.nasa.gov/data/active_fire/{sat[1]}/csv/{sat[0]}_Global_{timespan}.csv"
         return url
         
     def _get_alerts(self, widget, change, data):
