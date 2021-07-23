@@ -3,6 +3,8 @@ import geopandas as gpd
 from traitlets import Int, Unicode, link
 import ipyvuetify as v
 
+from os.path import expanduser
+
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 from ..message import cm
@@ -13,7 +15,7 @@ COUNTRIES = gpd.read_file('https://raw.githubusercontent.com/johan/world.geo.jso
 
 class Parameters(v.Card, sw.SepalWidget):
     
-    TIME_SPAN = ['24 hours', '48 hours', '7 days']
+    TIME_SPAN = ['24 hours', '48 hours', '7 days', 'Historic']
     timespan = Unicode('24 hours').tag(sync=True)
     
     def __init__(self, **kwargs):
@@ -27,6 +29,21 @@ class Parameters(v.Card, sw.SepalWidget):
             items=self.TIME_SPAN,
             v_model=self.timespan,
         )
+        
+        home = expanduser("~")
+        self.input_file = sw.FileInput(['.csv'], home)
+        self.w_load = v.ExpansionPanels(children=[
+            v.ExpansionPanel(children=[
+                v.ExpansionPanelHeader(children=['Use a custom csv file']),
+                v.ExpansionPanelContent(children=[
+                    v.Flex(class_='d-flex align-center',
+                        children=[
+                            self.input_file
+                        ]
+                    )
+                ])
+            ])
+        ])
         
         self.w_aoi_method = v.Select(
             label=cm.ui.aoi_method,
@@ -49,6 +66,7 @@ class Parameters(v.Card, sw.SepalWidget):
             self.w_spantime,
             self.w_aoi_method,
             self.w_countries,
+            self.w_load,
             self.w_run,
             self.w_alert,
         ]
