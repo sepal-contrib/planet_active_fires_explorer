@@ -16,9 +16,9 @@ from ipyleaflet import WidgetControl, FullScreenControl, GeoJSON, TileLayer, Mar
 
 from sepal_ui import sepalwidgets as sw
 from sepal_ui.scripts import utils as su
-from ..message import cm
-from ..scripts.scripts import *
-from ..widget.custom_widgets import *
+from component.message import cm
+from component.scripts.scripts import *
+from component.widget.custom_widgets import *
 
 COUNTRIES = gpd.read_file('https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json')
 
@@ -26,10 +26,7 @@ class AlertMap(m.SepalMap):
     
     def __init__(self, parameters, planet_parameters, *args, **kwargs):
         
-        
-        
-        self.root_dir, self.data_dir = self._workspace()
-        
+            
         self.param = parameters
         self.planet_param = planet_parameters
         
@@ -113,6 +110,7 @@ class AlertMap(m.SepalMap):
         self.add_control(options_control)
                 
         self.close_param = v.Icon(children=['mdi-close'])
+        
         self.w_parameters = Card(
             class_='px-2',
             children=[
@@ -223,7 +221,9 @@ class AlertMap(m.SepalMap):
         confidence = change['new']
         
         if confidence != 'All':
-            self.w_alerts.items = self.aoi_alerts[self.aoi_alerts.confidence==confidence.lower()].index.to_list()
+            self.w_alerts.items = self.aoi_alerts[
+                self.aoi_alerts.confidence==confidence.lower()
+            ].index.to_list()
         else:
             self.w_alerts.items = self.aoi_alerts.index.to_list()
         
@@ -445,10 +445,11 @@ class AlertMap(m.SepalMap):
         url = self._get_url('viirs')
         
         df = pd.read_csv(url)
-        alerts_gdf = gpd.GeoDataFrame(df, 
-                                      geometry=gpd.points_from_xy(df.longitude, 
-                                                                  df.latitude), 
-                                      crs="EPSG:4326")
+        alerts_gdf = gpd.GeoDataFrame(
+            df, 
+            geometry=gpd.points_from_xy(df.longitude, df.latitude), 
+            crs="EPSG:4326"
+        )
         
         self.alerts = alerts_gdf
         
@@ -466,18 +467,14 @@ class AlertMap(m.SepalMap):
         self.aoi_alerts = self.aoi_alerts.assign(geometry=geometry_col)
         json_aoi_alerts = json.loads(self.aoi_alerts.to_crs('EPSG:4326').to_json())
         
-        json_aoi_alerts = GeoJSON(data=json_aoi_alerts,
-                                name='Alerts', 
-                                style={                                    
-                                     'color': 'red', 
-                                     'fillOpacity': 0.1, 
-                                     'weight': 2
-                                 },
-                                hover_style={
-                                    'color': 'white', 
-                                    'dashArray': '0', 
-                                    'fillOpacity': 0.5
-                                },)
+        json_aoi_alerts = GeoJSON(
+            data=json_aoi_alerts, name='Alerts', 
+            style={                                    
+                'color': 'red', 'fillOpacity': 0.1, 'weight': 2
+            },
+            hover_style={
+                'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5
+            },)
         
         
         self+json_aoi_alerts
@@ -503,13 +500,3 @@ class AlertMap(m.SepalMap):
             Returns environment Paths
 
         """
-
-        base_dir = Path('~', 'module_results').expanduser()
-        root_dir = base_dir/'Planet_fire_explorer'
-        data_dir = root_dir/'data'
-        
-        base_dir.mkdir(exist_ok=True)
-        root_dir.mkdir(parents=True, exist_ok=True)
-        data_dir.mkdir(parents=True, exist_ok=True)
-
-        return root_dir, data_dir
