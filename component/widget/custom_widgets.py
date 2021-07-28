@@ -1,21 +1,77 @@
-# -*- coding: utf-8 -*-
-
-import datetime
-from functools import partial
-
 import ipyvuetify as v
-from traitlets import (
-    Unicode, observe, directional_link, 
-    List, Int, Bool, Any, link
-)
+from ipywidgets import jslink
+from traitlets import Unicode, List, Int, Any, link
 
 from sepal_ui.sepalwidgets import SepalWidget
-from sepal_ui.sepalwidgets.sepalwidget import SepalWidget, TYPES
-from sepal_ui.frontend.styles import sepal_darker
 
 class Card(v.Card, SepalWidget):
     def __init__(self, *args,**kwargs):
         super().__init__(*args, **kwargs)
+        
+class Flex(v.Flex, SepalWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+class Select(v.Select, SepalWidget):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        
+class DatePicker(v.Layout, SepalWidget):
+    """
+    Custom input widget to provide a reusable DatePicker. It allows to choose date as a string in the following format YYYY-MM-DD
+    
+    Args:
+        label (str, optional): the label of the datepicker field
+        
+    Attributes:
+        menu (v.Menu): the menu widget to display the datepicker
+        
+    """
+    def __init__(self, *args, label="Date", **kwargs):
+        
+        self.v_model = ''
+        self.row = True
+        self.class_ = 'pa-5'
+        self.align_center = True
+
+        super().__init__(*args, **kwargs)
+        
+        date_picker = v.DatePicker(
+            no_title = True, 
+            v_model = '', 
+            scrollable = True
+        )
+
+        date_text = v.TextField(
+            v_model = '',
+            label = label,
+            hint = "YYYY-MM-DD format",
+            persistent_hint = True, 
+            prepend_icon = "event",
+            readonly = True,
+            v_on = 'menuData.on'
+        )
+
+        self.menu = v.Menu(
+            min_width="290px",
+            transition = "scale-transition",
+            offset_y = True, 
+            value = False,
+            close_on_content_click = False,
+            children = [date_picker],
+            v_slots = [{
+                'name': 'activator',
+                'variable': 'menuData',
+                'children': date_text,
+            }]
+        )
+
+        self.children = [
+            v.Flex(xs10=True, children=[self.menu])
+        ]
+        
+        jslink((date_picker, 'v_model'), (date_text, 'v_model'))
+        jslink((date_picker, 'v_model'), (self, 'v_model'))
     
 class DynamicSelect(v.Card):
     
@@ -115,21 +171,69 @@ class Tabs(v.Card):
         self.background_color="primary"
         self.dark = True
         
-        self.tabs = [v.Tabs(v_model=self.current, children=[
-            v.Tab(children=[title], key=key) 
-            for key, title in enumerate(titles)
-        ])]
+        self.tabs = [
+            v.Tabs(
+                v_model=self.current, 
+                children=[
+                    v.Tab(children=[title], key=key) 
+                    for key, title in enumerate(titles)
+                ]
+            )
+        ]
         
-        self.content = [v.TabsItems(
-            v_model=self.current, 
-            children=[
-                v.TabItem(children=[content], key=key) for key, content 
-                in enumerate(content)
-            ]
-        )]
+        self.content = [
+            v.TabsItems(
+                v_model=self.current, 
+                children=[
+                    v.TabItem(children=[content], key=key) 
+                    for key, content 
+                    in enumerate(content)
+                ]
+            )
+        ]
         
         self.children= self.tabs + self.content
         
         link((self.tabs[0], 'v_model'),(self.content[0], 'v_model'))
         
         super().__init__(**kwargs)
+
+class MetadataTable(v.SimpleTable, SepalWidget):
+    """Widget to get a simple table displaying the metadata alerts"""
+    
+    def __init__(self, data, *args, **kwargs):
+        
+        self.dense = True
+
+        # Create table
+        super().__init__(*args, **kwargs)
+        
+        # Build table
+        self.get_table(data)
+        
+        
+    def get_table(self, data):
+                
+        CONFIDENCE = {'low':'red', 'high':'green', 'nominal':'orange'}
+        
+        def get_row(header, value):
+            
+            if header == 'Confidence: ':
+                value = v.Chip(
+                    small=True, 
+                    color=CONFIDENCE[value],
+                    children=[value]
+                )
+            
+            return [
+                v.Html(tag = 'th', children=[header]) 
+            ] + [v.Html(tag='td', children=[value])]
+        
+        rows = [
+            v.Html(
+                tag='tr', 
+                children=get_row(str(row_header), str(row_value))
+            ) for row_header, row_value in data
+        ]
+        
+        self.children = [v.Html(tag = 'tbody', children = rows)]

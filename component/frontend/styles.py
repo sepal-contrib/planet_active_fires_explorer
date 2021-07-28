@@ -1,29 +1,31 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
+# #!/usr/bin/env python3
+# # -*- coding: utf-8 -*-
 
-from ipywidgets import HTML
-from IPython.display import display
-import ipyvuetify as v
+# from ipywidgets import HTML
+# from IPython.display import display
+# import ipyvuetify as v
 
-STYLES = """
-<style>
-body.jp-Notebook, 
-div.jp-Cell,
-div.jp-OutputArea-output {
+# STYLES = """
+# <style>
 
-    margin: 0 !important;
-    padding: 0 !important;
-}
+# .leaflet-widgetcontrol {
+#     box-shadow: none !important;
+# }
 
-.leaflet-widgetcontrol {
-    box-shadow: none !important;
-}
+# .theme--dark.v-application {
+#     background: none !important;
+# }
 
-.theme--dark.v-application {
-    background: none !important;
-}
+# </style>
+# """
 
-</style>
-"""
+# _ = display(HTML(STYLES))
 
-_ = display(HTML(STYLES))
+
+# # body.jp-Notebook, 
+# # div.jp-Cell,
+# # div.jp-OutputArea-output {
+
+# #     margin: 0 !important;
+# #     padding: 0 !important;
+# # }
