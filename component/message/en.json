@@ -12,6 +12,7 @@
         },
         "cloud_cover": "Cloud cover",
         "days_before": "Search up to (days before):",
+        "days_after": "Search up to (days after):",
         "searching_planet": "Searching planet imagery...",
         "max_images": "Search up to (number of images):",
         "planet_title": "Planet imagery settings",
@@ -19,12 +20,15 @@
         "one_image" : "There is 1 Planet image.",
         "no_planet" : "There are not Planet images with the given filters.",
         "valid_aoi" : "Please select a valid area of interest...",
-        "downloading_alerts" : "Downloading alerts",
+        "downloading_alerts" : "Downloading alerts...",
         "alert_number" : "There are {} fire alerts in the last {}.",
         "clipping" : "Clipping alerts to area of interest...",
         "insert_api" : "Insert Planet API key",
         "no_key" : "Wrong Planet API Key." ,
         "no_latlon" : "Get alerts or click over any place in map." ,
-        "aoi_method" : "AOI method"
+        "aoi_method" : "AOI method",
+        "historic" : {
+            "alert_number" : "There are {} fire alerts between {} and {}."
+        }
     }
 }

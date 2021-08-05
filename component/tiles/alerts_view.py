@@ -1,3 +1,5 @@
+import pytz
+import datetime
 from numpy import float64
 
 import ipyvuetify as v
@@ -8,11 +10,12 @@ from sepal_ui.scripts import utils as su
 from component.message import cm
 from component.scripts.scripts import *
 from component.widget import *
+from component.parameter import SATSOURCE
 
 
 class AlertsView(v.Card):
     
-    TIME_SPAN = ['24 hours', '48 hours', '7 days', 'Historic']
+    TIME_SPAN = ['24 hours', '48 hours', '7 days']
     
     def __init__(self, model, aoi, planet, map_, *args, **kwargs):
         
@@ -25,7 +28,14 @@ class AlertsView(v.Card):
         
         # Widgets
         self.alert = sw.Alert()
-        self.btn = sw.Btn('Get Alerts')
+        self.btn = sw.Btn('Get Alerts', class_='ma-2')
+        
+        # Satellite
+        self.w_satellite = Select(
+            label='Satellite source',
+            v_model='viirs'
+        )
+        self.get_sat_sources()
         
         # Recent alerts
         self.w_recent = Select(
@@ -35,8 +45,21 @@ class AlertsView(v.Card):
         )
         
         # Historic Alerts
-        self.w_start = DatePicker(label='Start date (inclusive)', v_model='')
-        self.w_end = DatePicker(label='End date (inclusive)', v_model='')
+        self.w_start = DatePicker(
+            label='Start date (inclusive)',
+            min="2000-01-01",
+            max=self.get_max_date(),
+            v_model=self.model.start_date
+        )
+        
+        self.w_end = DatePicker(
+            class_='ml-5',
+            label='End date (inclusive)', 
+            min="2000-01-01",
+            max=self.get_max_date(),
+            v_model=self.model.end_date
+        )
+        
         self.w_historic = Flex(
             class_='d-flex',
             children=[self.w_start, self.w_end]
@@ -55,13 +78,15 @@ class AlertsView(v.Card):
         
         self.children=[
             self.w_alerts_type,
+            self.w_satellite,
             self.w_recent,
             self.w_historic,
+            self.btn,
             self.alert,
-            self.btn
         ]
         
         self.model.bind(self.w_alerts_type, 'alerts_type')\
+                .bind(self.w_satellite, 'satsource')\
                 .bind(self.w_recent, 'timespan')\
                 .bind(self.w_start, 'start_date')\
                 .bind(self.w_end, 'end_date')\
@@ -79,9 +104,41 @@ class AlertsView(v.Card):
         self.map_.w_alerts.observe(self.alert_list_event, 'v_model')
         
         self.btn.on_event('click', self.get_alerts)
+        
+    def get_sat_sources(self):
+        """Get the corresponding satellites depending on the alerts type"""
+        
+        if self.model.alerts_type == 'Recent':
+            self.w_satellite.items = [
+                {'text':v[0], 'value':k} 
+                for k, v
+                in SATSOURCE.items()
+            ]
+        else:
+            # For historic periods only download the MODIS alerts
+            # because the other sources are really heavy so it's difficult to
+            # incorporate all this data in the maps
+            # TODO: Find a solution to download any type of satellite alerts
+            self.w_satellite.items = [
+                {'text':v[0], 'value':k} 
+                for k, v
+                in SATSOURCE.items()
+                if k not in ['viirs', 'viirsnoa']
+            ]
+        
+    def get_max_date(self):
+        """Get the maximum available date """
+        
+        now = datetime.datetime.now(tz=pytz.timezone('UTC'))
+        year = now.year
+        
+        # The maximum available historic date is the current year - 1
+        return datetime.datetime.strftime(datetime.datetime(year-1,12,31), '%Y-%m-%d')
 
     def toggle_components(self, change):
         """Toggle components based on Radio groups"""
+        
+        self.get_sat_sources()
 
         if change['new'] == 'Recent':
             su.show_component(self.w_recent)
@@ -92,7 +149,8 @@ class AlertsView(v.Card):
             su.hide_component(self.w_recent)
                 
     def get_alerts(self, widget, change, data):
-        """Get the corresponding alerts clipped to the area of interest
+        """
+        Get the corresponding alerts clipped to the area of interest
         and display them into the map.
         
         """
@@ -103,34 +161,40 @@ class AlertsView(v.Card):
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_='info')
         
         # Get the corresponding alerts
-        if self.model.alerts_type == 'Recent':
-            self.model.alerts = self.model.get_recent_alerts()
-            
-        elif self.model.alerts_type == 'Historical':
-            self.model.alerts = self.model.get_historical_alerts()
+        self.model.download_alerts()
         
         # Clip alerts_gdf to the selected aoi
         self.alert.add_live_msg(msg=cm.ui.clipping,type_='info')
         self.model.aoi_alerts = self.model.clip_to_aoi()
-
-        self.alert.add_msg(
-            cm.ui.alert_number.format(
-                len(self.model.aoi_alerts), self.model.timespan
-            ), 
-            type_='success'
-        )
         
         # Update map dropdown alerts
         self.map_.w_alerts.items = list(self.model.aoi_alerts.index)
+        self.map_.w_alerts.w_conf.items = self.model.get_confidence_items()
+        
+        # Remove previous alert layers
+        self.map_.remove_layers_if('name', equals_to='Alerts')
         
         # Convert aoi alert points into squares
         square_alerts = self.model.alerts_to_squares()
         
-        # Add them into the map
+        # Add layer  into the map
         self.map_ + square_alerts
         
-        
         self.map_.w_alerts.disabled = False
+        self.map_.w_alerts.show()
+        
+        if self.model.alerts_type == 'Recent':
+            msg = cm.ui.alert_number.format(
+                len(self.model.aoi_alerts), self.model.timespan
+            )
+        else:
+            msg = cm.ui.historic.alert_number.format(
+                len(self.model.aoi_alerts), 
+                self.model.start_date,
+                self.model.end_date,
+            )
+        
+        self.alert.add_msg(msg, type_='success')
     
     
     def filter_confidence(self, change):
@@ -139,9 +203,20 @@ class AlertsView(v.Card):
         confidence = change['new']
         
         if confidence != 'All':
-            self.map_.w_alerts.items = self.model.aoi_alerts[
-                self.model.aoi_alerts.confidence==confidence.lower()
-            ].index.to_list()
+            # 
+            if self.model.satsource != 'modis':
+                self.map_.w_alerts.items = self.model.aoi_alerts[
+                    self.model.aoi_alerts.confidence==confidence.lower()
+                ].index.to_list()
+                
+            else:
+                
+                upper, lower = get_thresholds(lower=confidence)
+                self.map_.w_alerts.items = self.model.aoi_alerts[
+                    (self.model.aoi_alerts.confidence<=upper) &
+                    (self.model.aoi_alerts.confidence>lower)
+                ].index.to_list()
+                
         else:
             self.map_.w_alerts.items = self.model.aoi_alerts.index.to_list()
         
@@ -150,9 +225,13 @@ class AlertsView(v.Card):
         
         
     def _get_metadata(self, alert_id):
-        """Get a metadata table of alert and display as control """
+        """Get a metadata table of alert and display as control"""
         
-        col_names = ['latitude','longitude','acq_date','acq_time','confidence']
+        col_names = [
+            'latitude','longitude','acq_date',
+            'acq_time','confidence'
+        ]
+        
         headers= [f'{col_name.capitalize()}: ' for col_name in col_names]
         
         values=self.model.aoi_alerts.loc[alert_id, col_names].to_list()
@@ -164,7 +243,7 @@ class AlertsView(v.Card):
         
         data = zip(headers, values)
         
-        metadata_table = MetadataTable(data)
+        metadata_table = MetadataTable(data, self.model.satsource)
 
         with self.map_.metadata_output:
             self.map_.metadata_output.clear_output()
@@ -180,10 +259,15 @@ class AlertsView(v.Card):
         self.model.current_alert = change['new']
         
         # Filter dataframe to get lat,lon
-        lat = self.model.aoi_alerts.loc[self.model.current_alert]['latitude']
-        lon = self.model.aoi_alerts.loc[self.model.current_alert]['longitude']
+        self.map_.lat = self.model.aoi_alerts.loc[
+            self.model.current_alert
+        ]['latitude']
         
-        self.map_.center=((lat, lon))
+        self.map_.lon = self.model.aoi_alerts.loc[
+            self.model.current_alert
+        ]['longitude']
+        
+        self.map_.center=((self.map_.lat, self.map_.lon))
         self.map_.zoom=15
         self._get_metadata(self.model.current_alert)
         

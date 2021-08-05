@@ -9,128 +9,107 @@ from component.message import cm
 from component.scripts.scripts import *
 from component.widget.custom_widgets import *
 
+
 class AlertMap(m.SepalMap):
     
     def __init__(self, model, *args, **kwargs):
-        
+
         self.model = model
-        
-        self.alerts = None
-        self.aoi_alerts = None
-        self.current_alert = None
 
         self.lat = None
         self.lon = None
-        
-        super().__init__(
-            basemaps=['Google Satellite'], 
-            dc=True, 
-            *args, 
-            **kwargs
-        )
-        
+
+        super().__init__(basemaps=["Google Satellite"], dc=True, *args, **kwargs)
+
         self.show_dc()
         self.add_control(FullScreenControl())
-        
+
+        # Create widgets
+
         self.reload_btn = Button(
             disabled=False,
-            tooltip='Reload Planet imagery',
-            icon='refresh',
+            tooltip="Reload Planet imagery",
+            icon="refresh",
             layout=Layout(
-                width='30px', 
-                height='30px', 
-                line_height='30px', 
-                padding='0px'
-            )
+                width="30px", height="30px", line_height="30px", padding="0px"
+            ),
+        )
+        self.parameters_btn = Button(
+            tooltip="Toggle parameters",
+            icon="navicon",
+            layout=Layout(
+                width="30px", height="30px", line_height="30px", padding="0px"
+            ),
         )
         
-        # Create output space for metadata
-        self.metadata_output = Output()
-        
-        # Add metadata_output as WidgetControl to the map
-        metadata_control = WidgetControl(
-            widget=self.metadata_output, 
-            position='bottomright', 
-            transparent_bg=True)
-        self.add_control(metadata_control)
-        
-        # Add controls in this way to make the new one as first in the list
-        self.controls = tuple([
-                WidgetControl(
-                    widget=self.reload_btn, 
-                    position='topright', 
-                    transparent_bg=True
-                )] + 
-            [c for c in self.controls]
+        self.navigate_btn = Button(
+            tooltip="Navigate through Alerts",
+            icon="info",
+            layout=Layout(
+                width="30px", height="30px", line_height="30px", padding="0px"
+            ),
         )
         
+        self.w_alerts = DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = sepal_darker
-        
-        # Add controls in this way to make the new one as first in the list
-        self.controls = tuple(
-            [WidgetControl(widget=self.w_state_bar)]+\
-            [c for c in self.controls]
-        )
-        
-        # Add fires and planet parameters
-        
-        self.parameters_btn = Button(
-            tooltip='Toggle parameters',
-            icon='navicon',
-            layout=Layout(
-                width='30px', 
-                height='30px', 
-                line_height='30px', 
-                padding='0px'
-            )
-        )
-        options_control = WidgetControl(
-            widget=self.parameters_btn, 
-            position='topleft', 
-            transparent_bt=True
-        )
-        
-        self.add_control(options_control)
-                
 
-        
-        self.w_alerts = DynamicSelect(disabled=True)
-        alerts_control = WidgetControl(
-            widget=self.w_alerts, 
-            position='topright', 
-            transparent_bg=True
-        )
-        self.controls  = tuple([alerts_control] + [c for c in self.controls])
-        
-        
+        self.metadata_output = Output()
+
+        # Add widget as control to the map
+        self.add_widget_as_control(self.reload_btn, "topright", first=True)
+        self.add_widget_as_control(self.navigate_btn, "topright", first=True)
+        self.add_widget_as_control(self.parameters_btn, "topleft")
+        self.add_widget_as_control(self.w_alerts, "topright", first=True)
+        self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
+        self.add_widget_as_control(self.metadata_output, "bottomright")
+
+        # Map interactions
         self.dc.on_draw(self.handle_draw)
-        
-        
         self.on_interaction(self._return_coordinates)
-            
+        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
+        
+
+    def add_widget_as_control(self, widget, position, first=False):
+        """Add widget as control in the given position
+
+        Args:
+            widget (dom.widget): Widget to convert as map control
+            position (str): 'topleft', 'topright', 'bottomright', 'bottomlreft'
+            first (Bool): Whether set the control as first or last element
+        """
+
+        new_control = WidgetControl(
+            widget=widget, position=position, transparent_bg=True
+        )
+
+        if first == True:
+
+            self.controls = tuple(
+                [new_control] + [control for control in self.controls]
+            )
+        else:
+
+            self.controls = self.controls + tuple([new_control])
+
     def remove_layers(self):
-        """ Remove all layers in map. Except the basemap"""
+        """Remove all layers in map. Except the basemap"""
         # get map layers
         layers = self.layers
-        
-        # loop and remove layers 
+
+        # loop and remove layers
         [self.remove_last_layer() for _ in range(len(layers))]
-        
-        
+
     def handle_draw(self, target, action, geo_json):
         """Store geometry geometry in the model"""
-        
+
         self.remove_layers()
-        if action == 'created':
-            self.model.aoi_geometry = {
-                'type': 'FeatureCollection', 'features': []
-            }
-            
-            self.model.aoi_geometry['features'].append(geo_json)
-            
-#             self.model.aoi_geometry = geo_json['geometry']
-            
+        if action == "created":
+            self.model.aoi_geometry = {"type": "FeatureCollection", "features": []}
+
+            self.model.aoi_geometry["features"].append(geo_json)
+
+    #             self.model.aoi_geometry = geo_json['geometry']
 
     def remove_layers_if(self, prop, equals_to, _metadata=False):
         """Remove layers with a given property and value
@@ -143,38 +122,38 @@ class AlertMap(m.SepalMap):
         """
         if _metadata:
             for layer in self.layers:
-                if hasattr(layer, '_metadata'):
-                    if layer._metadata[prop]==equals_to: self.remove_layer(layer)
+                if hasattr(layer, "_metadata"):
+                    if layer._metadata[prop] == equals_to:
+                        self.remove_layer(layer)
         else:
             for layer in self.layers:
                 if hasattr(layer, prop):
-                    if layer.attribution==equals_to: self.remove_layer(layer)
-                    
+                    if layer.__dict__['_trait_values'][prop] == equals_to:
+                        self.remove_layer(layer)
+
     def _return_coordinates(self, **kwargs):
 
-        if kwargs.get('type') == 'click':
+        if kwargs.get("type") == "click":
 
             # Remove markdown if there is one
-            self.remove_layers_if('type', equals_to='manual', _metadata=True)
+            self.remove_layers_if("type", equals_to="manual", _metadata=True)
 
-            self.lat, self.lon = kwargs.get('coordinates')
+            self.lat, self.lon = kwargs.get("coordinates")
 
             marker = Marker(
-                location=kwargs.get('coordinates'), 
-                alt='Manual', 
-                title='Manual', 
+                location=kwargs.get("coordinates"),
+                alt="Manual",
+                title="Manual",
                 draggable=False,
-                name='Manual marker'
+                name="Manual marker",
             )
-            marker.__setattr__('_metadata', {'type':'manual', 'id': None})
+            marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
             self.add_layer(marker)
-            
+
     def restore_widgets(self):
-        
-        self.w_run.disabled=False
-        self.w_run.loading=False
+
+        self.w_run.disabled = False
+        self.w_run.loading = False
         self.w_alerts.items = []
         self.w_alerts.v_model = None
-
-        

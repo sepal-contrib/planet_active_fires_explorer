@@ -14,6 +14,11 @@ class PanelTile(v.Card, sw.SepalWidget):
     
     def __init__(self, map_, model, *args, **kwargs):
         
+        self.min_height = '544px'
+        self.min_width = '462px'
+        self.max_width = '462px'
+        self.class_ = 'pa-2'
+        
         super().__init__(*args, **kwargs)
         
         

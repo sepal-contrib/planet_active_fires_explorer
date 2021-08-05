@@ -52,6 +52,13 @@ class PlanetView(v.Card, sw.SepalWidget):
             disabled=True
         )
         
+        self.w_days_after = sw.NumberField(
+            label=cm.ui.days_after,
+            max_=5,
+            v_model=self.model.days_after,
+            disabled=True
+        )
+        
         self.w_max_images = sw.NumberField(
             label=cm.ui.max_images,
             max_=6,
@@ -70,9 +77,10 @@ class PlanetView(v.Card, sw.SepalWidget):
         
         # Capture parameters and bind them to the model
         self.model.bind(self.w_api_key, 'api_key')\
-                .bind(self.w_days_before, 'days_before')\
-                .bind(self.w_max_images, 'max_images')\
-                .bind(self.w_cloud_cover, 'cloud_cover')\
+            .bind(self.w_days_before, 'days_before')\
+            .bind(self.w_days_after, 'days_after')\
+            .bind(self.w_max_images, 'max_images')\
+            .bind(self.w_cloud_cover, 'cloud_cover')
                 
         # Button events
         self.w_api_btn.on_event('click', self.validate_api_event)
@@ -87,6 +95,7 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.w_api_alert, 
             self.w_max_images,
             self.w_days_before,
+            self.w_days_after,
             self.w_cloud_cover,
         ]
         
@@ -98,10 +107,12 @@ class PlanetView(v.Card, sw.SepalWidget):
     def _toggle_planet_setts(self, on=True):
         
         if on:
+            self.w_days_after.disabled = False
             self.w_days_before.disabled = False
             self.w_cloud_cover.disabled = False
             self.w_max_images.disabled = False
         else:
+            self.w_days_after.disabled = True
             self.w_days_before.disabled = True
             self.w_cloud_cover.disabled = True
             self.w_max_images.disabled = True
@@ -129,17 +140,21 @@ class PlanetView(v.Card, sw.SepalWidget):
     def _get_items(self):
         """Get planet items based on the current coordinates"""
         
-        geom = json.loads(
-            dumps(Point(self.map_.lon, self.map_.lat)\
-                  .buffer(0.001, cap_style=3))
-        )
-#         display(self.model.aoi_alerts.loc[self.model.current_alert])
+        # Get current map coordinates
+        lat = self.map_.lat
+        lon = self.map_.lon
+        
+        geom = json.loads(dumps(Point(lon, lat).buffer(0.001, cap_style=3)))
+
         acqdate = self.model.aoi_alerts.loc[self.model.current_alert].acq_date
         
         now = datetime.datetime.strptime(acqdate, '%Y-%m-%d')
+        
         days_before = self.model.days_before
-        future = now+datetime.timedelta(days=days_before)
+        days_after = self.model.days_after
+        
         start_date = now-datetime.timedelta(days=days_before)
+        future = now+datetime.timedelta(days=days_after+1)
         
         req = build_request(
             geom, start_date, future, cloud_cover=self.model.cloud_cover/100
@@ -147,11 +162,9 @@ class PlanetView(v.Card, sw.SepalWidget):
         
         return get_items('Alert', req, self.model.client)
     
-    def _prioritize_items(self):
+    def _prioritize_items(self, items):
         """Prioritize planet items"""
-        self.map_.w_state_bar.add_msg(cm.ui.searching_planet, loading=True)
         
-        items = self._get_items()
         items = [
             (
                 item['properties']['item_type'], 
@@ -208,9 +221,13 @@ class PlanetView(v.Card, sw.SepalWidget):
         # Validate whether Planet API Key is valid,
         # and if there is already selected coordinates.
         
-        if self.validate_state_bar(): 
-        
-            items_df = self._prioritize_items()
+        if self.validate_state_bar():
+            
+            self.map_.w_state_bar.add_msg(cm.ui.searching_planet, loading=True)
+            
+            items = self._get_items()
+            
+            items_df = self._prioritize_items(items)
 
             # remove all previous loaded assets
 
@@ -221,10 +238,9 @@ class PlanetView(v.Card, sw.SepalWidget):
             for i, row in items_df.iterrows():
                 layer = TileLayer(
                     url=PLANET_TILES_URL.format(
-                        row.item_type, row.id, self.planet_param.api_key
+                        row.item_type, row.id, self.model.api_key
                     ),
                     name=f'{row.item_type}, {row.date}',
-#                     max_zoom=15,
                     attribution='Imagery © Planet Labs Inc.'
                 )
                 layer.__setattr__(
@@ -245,6 +261,6 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.map_.w_state_bar.add_msg(cm.ui.no_latlon, loading=False)
             
         else:
-            return True            
+            return True
 
             
