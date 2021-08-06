@@ -26,8 +26,8 @@ class AlertModel(model.Model):
     # Planet parameters
 
     cloud_cover = Int(20).tag(sync=True)
-    days_before = Int(0).tag(sync=True)
-    days_after = Int(0).tag(sync=True)
+    days_before = Int(1).tag(sync=True)
+    days_after = Int(1).tag(sync=True)
     max_images = Int(6).tag(sync=True)
     api_key = Unicode("").tag(sync=True)
 

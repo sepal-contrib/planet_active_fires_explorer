@@ -127,7 +127,7 @@ class DynamicSelect(v.Card, SepalWidget):
         )
 
         self.children = [
-            title,
+#             title,
             v.Flex(
                 class_ = 'd-flex align-center',
                 children=[
@@ -145,7 +145,7 @@ class DynamicSelect(v.Card, SepalWidget):
 
         self.w_prev.on_event('click', self.prev_next_event)
         self.w_next.on_event('click', self.prev_next_event)
-        self.close.on_event('click', lambda *args: self.hide())        
+        self.close.on_event('click', lambda *args: self.hide())     
 
     def prev_next_event(self, widget, change, data):
 
@@ -159,7 +159,32 @@ class DynamicSelect(v.Card, SepalWidget):
         elif widget._metadata['name'] == 'previous':
             if position > 0:
                 self.w_list.v_model = self.w_list.items[position - 1]
+                
 
+class AlertMenu(v.Menu):
+
+    def __init__(self, widget, *args, **kwargs):
+
+        self.value=False
+        self.close_on_content_click = False
+        self.nudge_width = 200
+        self.offset_x=True
+
+        super().__init__()
+        
+        self.nav_btn = v.Btn(
+            v_on='menu.on',
+            icon = True, 
+            children=[v.Icon(children=['mdi-cloud-download'])]
+        )
+        
+        self.v_slots = [{
+            'name': 'activator',
+            'variable': 'menu',
+            'children': self.nav_btn
+        }]
+        
+        self.children=[widget]
 
 class Tabs(v.Card):
 

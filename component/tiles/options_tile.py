@@ -14,7 +14,7 @@ class PanelTile(v.Card, sw.SepalWidget):
     
     def __init__(self, map_, model, *args, **kwargs):
         
-        self.min_height = '544px'
+        self.min_height = '370px'
         self.min_width = '462px'
         self.max_width = '462px'
         self.class_ = 'pa-2'
@@ -58,6 +58,9 @@ class PanelTile(v.Card, sw.SepalWidget):
         
         # Open dialog when map parameters button is clicked
         self.map_.parameters_btn.on_click(lambda *args: self.toggle_viz())
+        
+        
+
         
         
     

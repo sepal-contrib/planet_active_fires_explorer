@@ -13,6 +13,64 @@ from component.scripts.scripts import *
 from component.model import AlertModel
 from component.message import cm
 
+CHIPS = {
+    # The key is the name attribute name in the model : [name, icon, unit]
+    'max_images' : ['Max number of images', 'mdi-checkbox-multiple-blank', 'img'],
+    'days_before' : ['Search up to days before', 'mdi-arrow-left-circle', 'd'],
+    'days_after' : ['Search up to days after', 'mdi-arrow-right-circle', 'd'],
+    'cloud_cover' : ['Max cloud cover threshold', 'mdi-cloud', '%'],
+}
+
+class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
+    
+    def __init__(self, model, widgets):
+        
+        # link with model
+        self.model = model
+        self.title = 'Advanced settings: '
+        
+        # create a header, and display the default values
+        self.header = v.ExpansionPanelHeader()
+        self.shrunk_content()
+        
+        self.content = v.ExpansionPanelContent(
+            children = [w for w in widgets]
+        )
+
+        self.children = [self.header, self.content]
+        
+        super().__init__()
+                
+        
+    def expand_content(self):
+        """Set title when content is expanded"""
+        
+        self.header.children = [self.title]
+    
+    def shrunk_content(self):
+        """Display chips when content is shrunk"""
+                
+        # create chips
+        chips = [
+            sw.Tooltip(
+                v.Chip(
+                    class_='ml-1 mr-1', 
+                    x_small=True, 
+                    children=[
+                        v.Icon(
+                            class_='mr-1',
+                            x_small=True,
+                            children=[CHIPS[prop][1]]
+                        ),
+                        # Concatenate the value and the units
+                        str(getattr(self.model, prop))+f' {CHIPS[prop][2]}'
+                    ]
+                ), CHIPS[prop][0], bottom=True
+            ) for prop in CHIPS
+        ]
+
+        self.header.children = [self.title] + chips
+        
 class PlanetView(v.Card, sw.SepalWidget):
     
     """Stand-alone component to get the user planet inputs and validate its
@@ -63,7 +121,7 @@ class PlanetView(v.Card, sw.SepalWidget):
             label=cm.ui.max_images,
             max_=6,
             min_=1,
-            v_model=1,
+            v_model=self.model.max_images,
             disabled=True
         )
         
@@ -73,8 +131,22 @@ class PlanetView(v.Card, sw.SepalWidget):
             v_model=self.model.cloud_cover,
             disabled=True
         )
-
         
+        self.components = [
+            self.w_max_images,
+            self.w_days_after,
+            self.w_days_before,
+            self.w_cloud_cover,
+        ]
+        
+        self.panels = v.ExpansionPanels(
+            v_model=None,
+            class_='mt-2',
+            children=[
+                CustomPanel(self.model, self.components)
+            ]
+        )
+
         # Capture parameters and bind them to the model
         self.model.bind(self.w_api_key, 'api_key')\
             .bind(self.w_days_before, 'days_before')\
@@ -92,30 +164,31 @@ class PlanetView(v.Card, sw.SepalWidget):
                 row=True, 
                 children =[self.w_api_key, self.w_api_btn]
             ),
-            self.w_api_alert, 
-            self.w_max_images,
-            self.w_days_before,
-            self.w_days_after,
-            self.w_cloud_cover,
+            self.w_api_alert,
+            self.panels
         ]
         
         
         # Interactions with Map
-        
         self.map_.reload_btn.on_click(self.add_planet_imagery)
+        
+        # ui events
+        self.panels.observe(self._on_panel_change, 'v_model')
+        
+    def _on_panel_change(self, change):
+        """Expand or shrunk content"""
+        
+        if change['new'] == 0:
+            self.panels.children[0].expand_content()
+        else:
+            self.panels.children[0].shrunk_content()
 
     def _toggle_planet_setts(self, on=True):
         
-        if on:
-            self.w_days_after.disabled = False
-            self.w_days_before.disabled = False
-            self.w_cloud_cover.disabled = False
-            self.w_max_images.disabled = False
-        else:
-            self.w_days_after.disabled = True
-            self.w_days_before.disabled = True
-            self.w_cloud_cover.disabled = True
-            self.w_max_images.disabled = True
+
+        for w in self.components:
+            setattr(w, 'disabled', False)  if on else setattr(w, 'disabled', True)
+
             
     def validate_api_event(self, widget, change, data):
         """Event to validate the Planet API Key input and activate/deactivate
@@ -263,4 +336,5 @@ class PlanetView(v.Card, sw.SepalWidget):
         else:
             return True
 
-            
+        
+
