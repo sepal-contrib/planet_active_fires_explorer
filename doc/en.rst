@@ -19,15 +19,14 @@ The module options panel is divided into three tabs: - :code:`Planet Imagery`, `
 
 .. note:: This step is optional but highly recommended. Although you can go trhough the next tabs and get the fire alerts from the different satellite sources, to get the most advantage of the module, you will need a Planet API Key with access to daily imagery. 
 
-- Validate your Planet API Key: provide a valid API Key in the input box and click over the validation button, the module will check whether the key is valid or not and the messages of its connection will be displayed directly into the alerts widget. Once your validation is done, you can open the advanced settings expansion panel and modify its inputs.
+- Validate your Planet API Key: provide a valid API Key in the input box and click over the validation button, the module will check whether the key is valid or not and the messages of its connection will be displayed directly into the alerts widget. Once your validation is done, you can open the advanced settings expansion panel and modify its inputs. 
 
-  - Open the Advanced settings panel: 
-    - Max number of images: 
-    - Search up to 'x' days before:
-    - Search up to 'x' days after:
-    - Cloud cover threshold:
+  - Open the Advanced settings panel
+    - Max number of images: maximum number of planet images to be displayed at once in each alert.
+    - Search up to 'x' days before: number of days before the fire alert date to look up for the best image available.
+    - Search up to 'x' days after: number of days after the fire alert date to look up for the best image available.
+    - Cloud cover threshold: maximum cloud cover threshold accepted in the images (based on the planet metadata).
    
- The module will search the mos 
  
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/planet.gif
 
