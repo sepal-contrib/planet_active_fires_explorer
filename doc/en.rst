@@ -36,7 +36,7 @@ The settings panel is composed by three tabs: :code:`Planet Imagery`, :code:`Are
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/planet.gif
    :align: center
 
-2. Select and area of interest (AOI)
+2. Select area of interest (AOI)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The module has two options to select and area of interest and filter alerts based on the given parameters.
