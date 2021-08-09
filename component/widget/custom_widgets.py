@@ -5,6 +5,7 @@ from sepal_ui.sepalwidgets import SepalWidget
 from component.parameter import CONFIDENCE
 import component.scripts.scripts as cs
 
+
 class Card(v.Card, SepalWidget):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -145,7 +146,7 @@ class DynamicSelect(v.Card, SepalWidget):
 
         self.w_prev.on_event('click', self.prev_next_event)
         self.w_next.on_event('click', self.prev_next_event)
-        self.close.on_event('click', lambda *args: self.hide())     
+        self.close.on_event('click', lambda *args: self.hide())
 
     def prev_next_event(self, widget, change, data):
 
@@ -221,32 +222,35 @@ class Tabs(v.Card):
         super().__init__(**kwargs)
 
 
-class MetadataTable(v.SimpleTable, SepalWidget):
-    """Widget to get a simple table displaying the metadata of the alerts
-    
-    Args:
-        satsource (str model.satsource): Satellite source
-    """
+class MetadataTable(v.Card, SepalWidget):
+    """Widget to get a simple table displaying the metadata of the alerts"""
 
-    def __init__(self, data, satsource, *args, **kwargs):
+    def __init__(self, *args, **kwargs):
 
-        self.dense = True
-        self.satsource=satsource
 
         # Create table
         super().__init__(*args, **kwargs)
+        
+        self.close = v.Icon(children=['mdi-close'], small=True)
+        self.title = v.CardTitle(class_='pa-0 ma-0', children=[v.Spacer(), self.close])
+                
+        self.close.on_event('click', lambda *args: self.hide())
+        
 
-        # Build table
-        self.get_table(data)
-
-    def get_table(self, data):
+    def update(self, satsource, data):
+        """Create metadata Simple Table based on the given data
+        
+        Args:
+            satsource (str model.satsource): Satellite source
+            data (list of lists): Each element has to follow: [header, value]
+        """
         
         def get_row(header, value):
 
             if header == 'Confidence: ':
                 value = v.Chip(
                     small=True, 
-                    color=cs.get_confidence_color(self.satsource, value), 
+                    color=cs.get_confidence_color(satsource, value), 
                     children=[value]
                 )
                 
@@ -259,4 +263,7 @@ class MetadataTable(v.SimpleTable, SepalWidget):
             for row_header, row_value in data
         ]
 
-        self.children = [v.Html(tag='tbody', children=rows)]
+        self.children = [self.title] + [
+            v.SimpleTable(dense=True, children=[v.Html(tag='tbody', children=rows)])
+        ]
+        

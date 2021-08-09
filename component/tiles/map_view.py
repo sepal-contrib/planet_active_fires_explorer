@@ -50,11 +50,19 @@ class AlertMap(m.SepalMap):
             ),
         )
         
+        self.metadata_btn = Button(
+            tooltip="Fire alert metadata",
+            icon="info",
+            layout=Layout(
+                width="30px", height="30px", line_height="30px", padding="0px"
+            ),
+        )
+        
         self.w_alerts = DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = sepal_darker
-
-        self.metadata_output = Output()
+        
+        self.metadata_table = MetadataTable()
 
         # Add widget as control to the map
         self.add_widget_as_control(self.reload_btn, "topright", first=True)
@@ -62,14 +70,18 @@ class AlertMap(m.SepalMap):
         self.add_widget_as_control(self.parameters_btn, "topleft")
         self.add_widget_as_control(self.w_alerts, "topright", first=True)
         self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
-        self.add_widget_as_control(self.metadata_output, "bottomright")
-
+        self.add_widget_as_control(self.metadata_btn, "topright")
+        self.add_widget_as_control(self.metadata_table, "bottomright")
+        
         # Map interactions
         self.dc.on_draw(self.handle_draw)
         self.on_interaction(self._return_coordinates)
-        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
         
-
+        # show/hide elements
+        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
+        self.metadata_btn.on_click(lambda *args: self.metadata_table.toggle_viz())
+        
+        
     def add_widget_as_control(self, widget, position, first=False):
         """Add widget as control in the given position
 

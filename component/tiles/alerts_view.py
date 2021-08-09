@@ -243,13 +243,10 @@ class AlertsView(v.Card):
         
         data = zip(headers, values)
         
-        metadata_table = MetadataTable(data, self.model.satsource)
-
-        with self.map_.metadata_output:
-            self.map_.metadata_output.clear_output()
-            display(v.Card(width='200px', children=[metadata_table]))
-
         
+        # Update metadata table content
+        self.map_.metadata_table.update(self.model.satsource, data)
+
     def alert_list_event(self, change):
         """ Update map zoom, center when selecting an alert
         and add metadata to map
