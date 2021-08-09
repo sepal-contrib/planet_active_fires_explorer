@@ -45,7 +45,6 @@ The module has two options to select and area of interest and filter alerts base
 - Select a country: type the name of the country directly into the search box or navigate though it by using the scroll bar, and select the desired country. Once the country is selected, it will be displayed in the map view.
   
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/aoi.gif
-   :align: center
    
 3. Get fire alerts
 ^^^^^^^^^^^^^^^^^^
@@ -62,6 +61,8 @@ Navigate through alerts
 -----------------------
 
 Once the alerts are being displayed on the map, you will be able to navigate trhough each of them by using the :code:`navigation widget`. Click :code:`next` and :code:`prev` button to navigate over the fire alerts, and use the :code:`confidence` dropdown to filter the alerts by its confidence (`What is the detection confidence? <https://earthdata.nasa.gov/faq/firms-faq>`_).
+
+.. image:: https://github.com/dfguerrerom/planet_active_fires_explorer/blob/main/doc/gif/alerts_navigation.gif
 
 .. tip:: You can activate/deactive the firee navigation widget by clicking over the fires |fires| button.
 
