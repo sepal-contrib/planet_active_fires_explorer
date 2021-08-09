@@ -2,7 +2,7 @@
 SEPAFE
 ======
 
-The Sepal Planet Active Fires Explorer (SEPAFE) is a module developed on the SEPAL platform based on the Fire Information for Resource Management System (FIRMS) and using Planet Scope imagery from Planet Labs.
+The Sepal Planet Active Fires Explorer (SEPAFE) is a module developed on the SEPAL platform based on the `Fire Information for Resource Management System (FIRMS) <https://earthdata.nasa.gov/earth-observation-data/near-real-time/firms/about-firms>`_ and using Planet Scope imagery from Planet Labs.
 
 SEPAFE aims to provide users with a quick way to get and validate fire alerts from the FIRMS program by using daily planet imagery.
 
@@ -20,10 +20,11 @@ The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Are
 1. Connect your Planet API Key
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Validate your Planet API Key: provide a valid API Key in the input box and click over the validation button, the module will check whether the key is valid or not and the messages of its connection will be displayed directly into the alerts widget. Once your validation is done, you can open the advanced settings expansion panel and modify its inputs. 
-
 .. note:: This step is optional but highly recommended. Although you can go through the next tabs and get the fire alerts from the different satellite sources, to get the most advantage of the module, you will need a Planet API Key with access to daily imagery. 
 
+- Validate your Planet API Key: provide a valid API Key in the input box and click over the validation button, the module will check whether the key is valid or not and the messages of its connection will be displayed directly into the alerts widget. Once your validation is done, you can open the advanced settings expansion panel and modify its inputs. 
+
+.. tip:: use the planet state bar located in the top-left corner to get useful messages related with planet imagery, such as problems with the key or number of images loaded.
 
   - Open the Advanced settings panel
   
@@ -39,9 +40,9 @@ The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Are
 2. Select area of interest (AOI)
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-The module has two options to select an area of interest and filter alerts based on the given parameters.
+The module has two options to select an area of interest to filter alerts.
 
-- Draw a shape: when this option is selected, three drawing tools will be displayed in the top-left map corner, you can select a `square`, `circle`, and a `polygon`
+- Draw a shape: when this option is selected, three drawing tools will be displayed in the top-left map corner, you can select a `square`, `circle`, and a `polygon` and draw them on the map.
 - Select a country: type the name of the country directly into the search box or navigate through it by using the scroll bar, and select the desired country. Once the country is selected, it will be displayed in the map view.
   
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/aoi.gif
@@ -62,14 +63,21 @@ Navigate through alerts
 
 Once the alerts are being displayed on the map, you will be able to navigate through each of them by using the :code:`navigation widget`. Click :code:`next` and :code:`prev` buttons to navigate over the fire alerts, and use the :code:`confidence` dropdown to filter the alerts by its confidence (`What is the detection confidence? <https://earthdata.nasa.gov/faq/firms-faq>`_).
 
+  The confidence value was added to help users gauge the quality of individual fire pixels is included in the Level 2 fire product. The confidence field should be used with caution; it will likely vary in meaning in different parts of the world. Nevertheless, some of our end users have found such a field to be useful in excluding false-positive occurrences of fire. They are different for MODIS and VIIRS.
+
+
 .. image:: https://github.com/dfguerrerom/planet_active_fires_explorer/blob/main/doc/gif/alerts_navigation.gif
 
 .. tip:: You can activate/deactivate the firee navigation widget by clicking over the fires |fires| button.
 
-.. tip:: Planet parameters can be changed at any time, to refresh the results from the current alert click over the refresh |refresh| icon.
+.. tip:: Planet parameters can be changed at any time, to refresh the results from the current alert click over the refresh |refresh| icon. 
 
-  The confidence value was added to help users gauge the quality of individual fire pixels is included in the Level 2 fire product. The confidence field should be used with caution; it will likely vary in meaning in different parts of the world. Nevertheless, some of our end users have found such a field to be useful in excluding false-positive occurrences of fire. They are different for MODIS and VIIRS.
+Manually load planet imagery
+----------------------------
 
+Click over any point in the map and use the refresh icon |refresh| to retrieve planet imagery using the parameters set in the step 1, the module will use the current acquisition alert date to search the images. This option is useful when you want to explore surrounding areas close to the alert point but without alerts to display.
+
+.. warning:: For use this option you will require a valid planet level 2 key, otherwise you will get an error message displayed in the state bar.
 
 
 .. |fires| image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/img/alerts_icon.png
