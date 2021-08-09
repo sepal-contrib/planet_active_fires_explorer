@@ -44,7 +44,7 @@ class AlertMap(m.SepalMap):
         
         self.navigate_btn = Button(
             tooltip="Navigate through Alerts",
-            icon="info",
+            icon="fire",
             layout=Layout(
                 width="30px", height="30px", line_height="30px", padding="0px"
             ),
