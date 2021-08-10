@@ -19,3 +19,5 @@ CONFIDENCE = {
         30 : ['<50', 'red']
     }
 }
+
+BAR_FORMAT='{l_bar}{bar}{n_fmt}/{total_fmt}'

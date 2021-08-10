@@ -1,8 +1,10 @@
 import json
 from datetime import datetime
-from urllib.request import urlretrieve
+import urllib
 from pathlib import Path
 from zipfile import ZipFile
+from tqdm.auto import tqdm
+
 
 import pandas as pd
 import geopandas as gpd
@@ -59,7 +61,6 @@ class AlertModel(model.Model):
 
     def download_alerts(self):
         """Download the corresponding alerts based on the selected alert type"""
-
         if self.alerts_type == "Recent":
             # Donwload recent alerts
             url = self.get_url(self.satsource)
@@ -84,8 +85,29 @@ class AlertModel(model.Model):
 
                 # Verify if the files is not previously downloaded
                 out_file = HISTORIC_DIR / f"historic_{sat}_fires_{y}.zip"
+                
                 if not out_file.exists():
-                    urlretrieve(HISTORIC_URL.format(sat,y), out_file)
+                    
+                    url = HISTORIC_URL.format(sat,y)
+                    response = getattr(urllib, 'request', urllib).urlopen(url)
+                    with tqdm(
+                        unit='B', 
+                        unit_scale=True, 
+                        unit_divisor=1024, 
+                        miniters=1,
+                        desc='downloading...',
+                        bar_format=BAR_FORMAT,
+                        dynamic_ncols =True,
+                        total=getattr(response, 'length')
+                    ) as f:
+
+                        def callback(b, bsize, tsize):
+                            f.update(b * bsize - f.n)
+
+                        urllib.request.urlretrieve(url, out_file, callback)
+
+                        f.total = f.n
+                        
                 # Open all fires into the zipped files and merge
                 # thme into one single DataFrame
 
@@ -93,7 +115,12 @@ class AlertModel(model.Model):
                 dfs = pd.concat(
                     [
                         pd.read_csv(zip_file.open(text_file.filename))
-                        for text_file in zip_file.infolist()
+                        for text_file in tqdm(
+                            zip_file.infolist(),
+                            desc='unzipping...',
+                            dynamic_ncols =True,
+                            bar_format=BAR_FORMAT,
+                        )
                         if text_file.filename.endswith(".csv")
                     ]
                 )

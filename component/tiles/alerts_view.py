@@ -2,6 +2,7 @@ import pytz
 import datetime
 from numpy import float64
 
+from ipywidgets import Output
 import ipyvuetify as v
 
 import sepal_ui.sepalwidgets as sw
@@ -30,6 +31,9 @@ class AlertsView(v.Card):
         self.alert = sw.Alert()
         self.btn = sw.Btn('Get Alerts', class_='ma-2')
         
+        # Create an output for the progress tqdm bar
+        self.dwbar_output = Output()
+
         # Satellite
         self.w_satellite = Select(
             label='Satellite source',
@@ -125,6 +129,8 @@ class AlertsView(v.Card):
                 in SATSOURCE.items()
                 if k not in ['viirs', 'viirsnoa']
             ]
+            
+            self.w_satellite.v_model = self.w_satellite.items[0]['value']
         
     def get_max_date(self):
         """Get the maximum available date """
@@ -160,11 +166,16 @@ class AlertsView(v.Card):
         
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_='info')
         
-        # Get the corresponding alerts
-        self.model.download_alerts()
+        # Capture the tqdm bar with the output
+        with self.dwbar_output:
+            self.dwbar_output.clear_output()
+            self.alert.children = self.alert.children + [self.dwbar_output]
+            
+            # Get the corresponding alerts
+            self.model.download_alerts()
         
         # Clip alerts_gdf to the selected aoi
-        self.alert.add_live_msg(msg=cm.ui.clipping,type_='info')
+        self.alert.add_msg(msg=cm.ui.clipping,type_='info')
         self.model.aoi_alerts = self.model.clip_to_aoi()
         
         # Update map dropdown alerts
