@@ -294,7 +294,7 @@ class PlanetView(v.Card, sw.SepalWidget):
         # Validate whether Planet API Key is valid,
         # and if there is already selected coordinates.
         
-        if not self.model.aoi_alerts: 
+        if self.model.aoi_alerts is None:
             self.map_.w_state_bar.add_msg(cm.map.status.no_alerts, loading=False)
             return
         

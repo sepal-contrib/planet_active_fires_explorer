@@ -16,7 +16,11 @@ from component.parameter import SATSOURCE
 
 class AlertsView(v.Card):
     
-    TIME_SPAN = ['24 hours', '48 hours', '7 days']
+    TIME_SPAN = {
+        '24 hours': cm.alerts.hour24, 
+        '48 hours': cm.alerts.hour48, 
+        '7 days': cm.alerts.day7
+    }
     
     def __init__(self, model, aoi, planet, map_, *args, **kwargs):
         
@@ -29,28 +33,30 @@ class AlertsView(v.Card):
         
         # Widgets
         self.alert = sw.Alert()
-        self.btn = sw.Btn('Get Alerts', class_='ma-2')
+        self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_='ma-2')
         
         # Create an output for the progress tqdm bar
         self.dwbar_output = Output()
 
         # Satellite
         self.w_satellite = Select(
-            label='Satellite source',
+            label=cm.alerts.wlabel.satellite,
             v_model='viirs'
         )
         self.get_sat_sources()
         
         # Recent alerts
         self.w_recent = Select(
-            label="In the last",
-            items=self.TIME_SPAN,
+            label=cm.alerts.wlabel.in_the_last,
+            items=[
+                {'text':text, 'value':value} for text, value in self.TIME_SPAN.items()
+            ],
             v_model=self.model.timespan,
         )
         
         # Historic Alerts
         self.w_start = DatePicker(
-            label='Start date (inclusive)',
+            label=cm.alerts.wlabel.start,
             min="2000-01-01",
             max=self.get_max_date(),
             v_model=self.model.start_date
@@ -58,7 +64,7 @@ class AlertsView(v.Card):
         
         self.w_end = DatePicker(
             class_='ml-5',
-            label='End date (inclusive)', 
+            label=cm.alerts.wlabel.end, 
             min="2000-01-01",
             max=self.get_max_date(),
             v_model=self.model.end_date
@@ -71,12 +77,12 @@ class AlertsView(v.Card):
         
         # Selection type
         self.w_alerts_type = v.RadioGroup(
-            label = "Type of alerts",
+            label = cm.alerts.wlabel.alert_type,
             row= True,
             v_model = self.model.alerts_type,
             children = [
-                v.Radio(key=1, label='Recent', value='Recent'),
-                v.Radio(key=2, label='Historical', value='Historical'),
+                v.Radio(key=1, label=cm.alerts.wlabel.recent, value='recent'),
+                v.Radio(key=2, label=cm.alerts.wlabel.historical, value='historical'),
             ]
         )
         
@@ -112,7 +118,7 @@ class AlertsView(v.Card):
     def get_sat_sources(self):
         """Get the corresponding satellites depending on the alerts type"""
         
-        if self.model.alerts_type == 'Recent':
+        if self.model.alerts_type == 'recent':
             self.w_satellite.items = [
                 {'text':v[0], 'value':k} 
                 for k, v
@@ -130,10 +136,10 @@ class AlertsView(v.Card):
                 if k not in ['viirs', 'viirsnoa']
             ]
             
-            self.w_satellite.v_model = self.w_satellite.items[0]['value']
+        self.w_satellite.v_model = self.w_satellite.items[0]['value']
         
     def get_max_date(self):
-        """Get the maximum available date """
+        """Get the maximum available date for the historical data"""
         
         now = datetime.datetime.now(tz=pytz.timezone('UTC'))
         year = now.year
@@ -142,15 +148,15 @@ class AlertsView(v.Card):
         return datetime.datetime.strftime(datetime.datetime(year-1,12,31), '%Y-%m-%d')
 
     def toggle_components(self, change):
-        """Toggle components based on Radio groups"""
+        """Display recent or historical widget based on radios selection"""
         
         self.get_sat_sources()
 
-        if change['new'] == 'Recent':
+        if change['new'] == 'recent':
             su.show_component(self.w_recent)
             su.hide_component(self.w_historic)
 
-        elif change['new'] == 'Historical':
+        elif change['new'] == 'historical':
             su.show_component(self.w_historic)
             su.hide_component(self.w_recent)
                 
@@ -194,7 +200,7 @@ class AlertsView(v.Card):
         self.map_.w_alerts.disabled = False
         self.map_.w_alerts.show()
         
-        if self.model.alerts_type == 'Recent':
+        if self.model.alerts_type == 'recent':
             msg = cm.ui.alert_number.format(
                 len(self.model.aoi_alerts), self.model.timespan
             )
@@ -238,14 +244,20 @@ class AlertsView(v.Card):
     def _get_metadata(self, alert_id):
         """Get a metadata table of alert and display as control"""
         
-        col_names = [
-            'latitude','longitude','acq_date',
-            'acq_time','confidence'
-        ]
+        col_names = {
+            'latitude':cm.alerts.metadata.latitude,
+            'longitude':cm.alerts.metadata.longitude,
+            'acq_date':cm.alerts.metadata.acq_date,
+            'acq_time':cm.alerts.metadata.acq_time,
+            'confidence':cm.alerts.metadata.confidence
+        }
         
-        headers= [f'{col_name.capitalize()}: ' for col_name in col_names]
-        
-        values=self.model.aoi_alerts.loc[alert_id, col_names].to_list()
+        headers, values = list(zip(*[
+            (f'{col_name.capitalize()}: ',
+            self.model.aoi_alerts.loc[alert_id, col]) 
+            for col, col_name  in col_names.items()
+        ]))
+
         values=[
             round(val,2) 
             if isinstance(val, float64) 

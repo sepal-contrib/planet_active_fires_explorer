@@ -39,7 +39,7 @@ class AlertModel(model.Model):
 
     # Alerts type parameters
     satsource = Unicode('viirs').tag(sync=True)
-    alerts_type = Unicode("Recent").tag(sync=True)
+    alerts_type = Unicode("recent").tag(sync=True)
     start_date = Unicode("2020-01-01").tag(sync=True)
     end_date = Unicode("2020-02-01").tag(sync=True)
 
@@ -61,10 +61,12 @@ class AlertModel(model.Model):
 
     def download_alerts(self):
         """Download the corresponding alerts based on the selected alert type"""
-        if self.alerts_type == "Recent":
+        
+        if self.alerts_type == "recent":
             # Donwload recent alerts
             url = self.get_url(self.satsource)
             df = pd.read_csv(url)
+            
         else:
             # Download historical alerts
             start = datetime.strptime(self.start_date, "%Y-%m-%d")

@@ -35,18 +35,23 @@ class AoiView(v.Card):
         
         self.w_aoi_method = Select(
             label=cm.ui.aoi_method,
-            v_model='Draw on map',
-            items=['Draw on map', 'Select country'],
-            
+            v_model='draw',
+            items=[
+                {'text':cm.aoi.method.draw, 'value':'draw'},
+                {'text':cm.aoi.method.country, 'value':'country'}
+            ]
         )
+        
         self.w_countries = Select(
-            label="Select country",
+            label=cm.aoi.method.country,
             v_model='',
             items=COUNTRIES.name.to_list(),
         ).hide()
         
         # Bind selected parameters
-        self.model.bind(self.w_countries, 'country')
+        self.model.bind(self.w_countries, 'country')\
+            .bind(self.w_aoi_method, 'aoi_method')
+        
         
         self.children=[
             self.w_aoi_method,
@@ -61,7 +66,7 @@ class AoiView(v.Card):
         
         self.map_.remove_layers()
         
-        if change['new'] == 'Select country':
+        if change['new'] == 'country':
             self.map_.hide_dc()
             su.show_component(self.w_countries)
 
