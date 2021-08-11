@@ -15,10 +15,10 @@ from component.message import cm
 
 CHIPS = {
     # The key is the name attribute name in the model : [name, icon, unit]
-    'max_images' : ['Max number of images', 'mdi-checkbox-multiple-blank', 'img'],
-    'days_before' : ['Search up to days before', 'mdi-arrow-left-circle', 'd'],
-    'days_after' : ['Search up to days after', 'mdi-arrow-right-circle', 'd'],
-    'cloud_cover' : ['Max cloud cover threshold', 'mdi-cloud', '%'],
+    'max_images' : [cm.planet.chips.max_images, 'mdi-checkbox-multiple-blank', 'img'],
+    'days_before' : [cm.planet.chips.days_before, 'mdi-arrow-left-circle', 'd'],
+    'days_after' : [cm.planet.chips.days_after, 'mdi-arrow-right-circle', 'd'],
+    'cloud_cover' : [cm.planet.chips.cloud_cover, 'mdi-cloud', '%'],
 }
 
 class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
