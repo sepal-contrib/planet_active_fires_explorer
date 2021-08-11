@@ -1,6 +1,65 @@
 {
     "ui": {
+
+        "valid_aoi" : "Please select a valid area of interest...",
+        "downloading_alerts" : "Downloading alerts...",
+        "alert_number" : "There are {} fire alerts in the last {}.",
+        "clipping" : "Clipping alerts to area of interest...",
+        "aoi_method" : "AOI method",
+        "historic" : {
+            "alert_number" : "There are {} fire alerts between {} and {}."
+        }
+    },
+    "map" : {
+        "status" : {
+            "no_alerts" : "Please use the alert tab to download and display fire alerts",
+            "searching_planet": "Searching planet imagery...",
+            "number_images" : "There are {} Planet images.",
+            "one_image" : "There is 1 Planet image.",
+            "no_planet" : "There are not Planet images with the given filters."
+        }
+    },
+    "aoi" : {
+        "method": {
+            "draw": "Draw on map",
+            "country" : "Select country"
+        }
+    },
+    "alerts" : {
+        "wlabel": {
+            "get_alerts" : "Get alerts",
+            "satellite" : "Satellite source",
+            "in_the_last" : "In the last",
+            "start":"Start date (inclusive)",
+            "end":"End date (inclusive)",
+            "alert_type" : "Type of alerts",
+            "recent" : "Recent",
+            "historical" : "Historical"
+        },
+        "metadata" : {
+            "latitude" : "Latitude",
+            "longitude": "Longitude",
+            "acq_date" : "Acq. date",
+            "acq_time" : "Acq. time",
+            "confidence" : "Confidence"
+        },
+        "hour24": "24 hours",
+        "hour48": "48 hours",
+        "day7": "7 days"
+    },
+    "planet" : {
+        "card_title": "Planet imagery settings",
+        "insert_api" : "Insert a valid Planet API key",
         "default_api" : "Fill and validate your Planet API key.",
+        "no_key" : "Wrong Planet API Key." ,
+        "no_latlon" : "Get alerts or click over any place in map.",
+        "advanced_title" : "Advanced settings",
+        "label" : {
+            "cloud_cover": "Cloud cover",
+            "days_before": "Search up to (days before):",
+            "days_after": "Search up to (days after):",
+            "max_images": "Search up to (number of images):"
+        },
         "fill_api": "Please use a Planet API key and validate it.",
         "success_api": {
             "msg": "Your API key is valid", 
@@ -10,25 +69,12 @@
             "msg": "Your API key is not valid", 
             "type": "error"
         },
-        "cloud_cover": "Cloud cover",
-        "days_before": "Search up to (days before):",
-        "days_after": "Search up to (days after):",
-        "searching_planet": "Searching planet imagery...",
-        "max_images": "Search up to (number of images):",
-        "planet_title": "Planet imagery settings",
-        "number_images" : "There are {} Planet images.",
-        "one_image" : "There is 1 Planet image.",
-        "no_planet" : "There are not Planet images with the given filters.",
-        "valid_aoi" : "Please select a valid area of interest...",
-        "downloading_alerts" : "Downloading alerts...",
-        "alert_number" : "There are {} fire alerts in the last {}.",
-        "clipping" : "Clipping alerts to area of interest...",
-        "insert_api" : "Insert Planet API key",
-        "no_key" : "Wrong Planet API Key." ,
-        "no_latlon" : "Get alerts or click over any place in map." ,
-        "aoi_method" : "AOI method",
-        "historic" : {
-            "alert_number" : "There are {} fire alerts between {} and {}."
-        }
+        "chips" : {
+            "max_images" : "Max number of images",
+            "days_before" : "Search up to days before",
+            "days_after" : "Search up to days after",
+            "cloud_cover" : "Max cloud cover threshold"
+        },
+        "check_btn" : "Check"
     }
 }
