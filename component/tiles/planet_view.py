@@ -27,7 +27,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         
         # link with model
         self.model = model
-        self.title = 'Advanced settings: '
+        self.title = f'{cm.planet.advanced_title}: '
         
         # create a header, and display the default values
         self.header = v.ExpansionPanelHeader()
@@ -101,7 +101,7 @@ class PlanetView(v.Card, sw.SepalWidget):
             v_model=self.model.api_key
         )
         
-        self.w_api_btn = sw.Btn('Check ', small=True,)
+        self.w_api_btn = sw.Btn(cm.planet.check_btn, small=True,)
         
         self.w_days_before = sw.NumberField(
             label=cm.planet.label.days_before,
@@ -184,8 +184,8 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.panels.children[0].shrunk_content()
 
     def _toggle_planet_setts(self, on=True):
+        """Toggle planet widgets"""
         
-
         for w in self.components:
             setattr(w, 'disabled', False)  if on else setattr(w, 'disabled', True)
 
