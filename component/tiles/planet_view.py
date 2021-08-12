@@ -168,7 +168,6 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.panels
         ]
         
-        
         # Interactions with Map
         self.map_.reload_btn.on_click(self.add_planet_imagery)
         

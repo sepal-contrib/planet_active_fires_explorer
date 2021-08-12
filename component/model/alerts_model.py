@@ -65,7 +65,7 @@ class AlertModel(model.Model):
         """Create an output name for the aoi alerts"""
         
         now = datetime.now(tz=pytz.timezone('UTC'))
-        now = now.strftime('%h%m')+random_string()
+        now = now.strftime('%b%d')+random_string()
         
         method = f'custom_draw' if not self.country else self.country
         
@@ -82,9 +82,7 @@ class AlertModel(model.Model):
         
         if self.alerts_type == "recent":
             # Donwload recent alerts
-            url = self.get_url()
-            print(url)
-            df = pd.read_csv(url)
+            df = pd.read_csv(self.get_url())
             
         else:
             # Download historical alerts

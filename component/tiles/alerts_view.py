@@ -201,12 +201,13 @@ class AlertsView(v.Card):
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_='info')
         
         # Capture the tqdm bar with the output
-#         with self.dwbar_output:
-        self.dwbar_output.clear_output()
-        self.alert.children = self.alert.children + [self.dwbar_output]
+        with self.dwbar_output:
             
+            self.dwbar_output.clear_output()
+            self.alert.children = self.alert.children + [self.dwbar_output]
+
             # Get the corresponding alerts
-        self.model.download_alerts()
+            self.model.download_alerts()
         
         # Clip alerts_gdf to the selected aoi
         self.alert.add_msg(msg=cm.ui.clipping,type_='info')
