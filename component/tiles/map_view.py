@@ -70,8 +70,8 @@ class AlertMap(m.SepalMap):
         self.add_widget_as_control(self.parameters_btn, "topleft")
         self.add_widget_as_control(self.w_alerts, "topright", first=True)
         self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
-        self.add_widget_as_control(self.metadata_btn, "topright")
-        self.add_widget_as_control(self.metadata_table, "bottomright")
+        self.add_widget_as_control(self.metadata_btn, "topleft")
+        self.add_widget_as_control(self.metadata_table, "bottomleft")
         
         # Map interactions
         self.dc.on_draw(self.handle_draw)
