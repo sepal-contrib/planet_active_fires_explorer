@@ -1,3 +1,5 @@
+from component.message import cm
+
 """Include app parameters"""
 
 SATSOURCE = {
@@ -18,6 +20,13 @@ CONFIDENCE = {
         50 : ['>50, <80', 'orange'],
         30 : ['<50', 'red']
     }
+}
+
+# Time span for recent alerts
+TIME_SPAN = {
+    '24h': cm.alerts.hour24, 
+    '48h': cm.alerts.hour48, 
+    '7d': cm.alerts.day7
 }
 
 BAR_FORMAT='{l_bar}{bar}{n_fmt}/{total_fmt}'

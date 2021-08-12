@@ -34,7 +34,8 @@
             "end":"End date (inclusive)",
             "alert_type" : "Type of alerts",
             "recent" : "Recent",
-            "historical" : "Historical"
+            "historical" : "Historical",
+            "download_btn" : "Download"
         },
         "metadata" : {
             "latitude" : "Latitude",
@@ -45,7 +46,8 @@
         },
         "hour24": "24 hours",
         "hour48": "48 hours",
-        "day7": "7 days"
+        "day7": "7 days",
+        "exported":"Alerts successfully exported in {} folder as {}.shp."
     },
     "planet" : {
         "card_title": "Planet imagery settings",

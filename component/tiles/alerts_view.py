@@ -11,16 +11,10 @@ from sepal_ui.scripts import utils as su
 from component.message import cm
 from component.scripts.scripts import *
 from component.widget import *
-from component.parameter import SATSOURCE
+from component.parameter import SATSOURCE, TIME_SPAN
 
 
 class AlertsView(v.Card):
-    
-    TIME_SPAN = {
-        '24 hours': cm.alerts.hour24, 
-        '48 hours': cm.alerts.hour48, 
-        '7 days': cm.alerts.day7
-    }
     
     def __init__(self, model, aoi, planet, map_, *args, **kwargs):
         
@@ -33,7 +27,19 @@ class AlertsView(v.Card):
         
         # Widgets
         self.alert = sw.Alert()
+        
+        # Buttons
         self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_='ma-2')
+        self.download_btn = sw.Btn(
+            cm.alerts.wlabel.download_btn, 
+            'mdi-download', 
+            class_='ma-2',
+            disabled=True
+        )
+        
+        buttons = v.Flex(
+            children=[self.btn, self.download_btn]
+        )
         
         # Create an output for the progress tqdm bar
         self.dwbar_output = Output()
@@ -49,7 +55,7 @@ class AlertsView(v.Card):
         self.w_recent = Select(
             label=cm.alerts.wlabel.in_the_last,
             items=[
-                {'text':text, 'value':value} for text, value in self.TIME_SPAN.items()
+                {'text':text, 'value':value} for value, text in TIME_SPAN.items()
             ],
             v_model=self.model.timespan,
         )
@@ -91,7 +97,7 @@ class AlertsView(v.Card):
             self.w_satellite,
             self.w_recent,
             self.w_historic,
-            self.btn,
+            buttons,
             self.alert,
         ]
         
@@ -106,6 +112,11 @@ class AlertsView(v.Card):
             self.alert,self.btn,True
         )(self.get_alerts)
         
+        # Decorate buttons
+        self.write_alerts = su.loading_button(
+            self.alert,self.download_btn,True
+        )(self.write_alerts)
+        
         # View interactions
         self.w_alerts_type.observe(self.toggle_components)
         
@@ -114,6 +125,21 @@ class AlertsView(v.Card):
         self.map_.w_alerts.observe(self.alert_list_event, 'v_model')
         
         self.btn.on_event('click', self.get_alerts)
+        self.download_btn.on_event('click', self.write_alerts)
+        
+    def write_alerts(self, *args):
+        """Write AOI alerts into a shapefile on the module results"""
+        
+        name = self.model.get_alerts_name()
+        output = ALERTS_DIR/f'{name}.shp'
+        
+        # It will overwrite any previous created file.
+        self.model.aoi_alerts.to_file(output)
+        
+        self.alert.add_msg(
+            msg=cm.alerts.exported.format(ALERTS_DIR, name),type_='success'
+        )
+        
         
     def get_sat_sources(self):
         """Get the corresponding satellites depending on the alerts type"""
@@ -167,18 +193,20 @@ class AlertsView(v.Card):
         
         """
         
+        self.download_btn.disabled=True
+        
         if not self.model.aoi_geometry:
             raise Exception(cm.ui.valid_aoi)
         
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_='info')
         
         # Capture the tqdm bar with the output
-        with self.dwbar_output:
-            self.dwbar_output.clear_output()
-            self.alert.children = self.alert.children + [self.dwbar_output]
+#         with self.dwbar_output:
+        self.dwbar_output.clear_output()
+        self.alert.children = self.alert.children + [self.dwbar_output]
             
             # Get the corresponding alerts
-            self.model.download_alerts()
+        self.model.download_alerts()
         
         # Clip alerts_gdf to the selected aoi
         self.alert.add_msg(msg=cm.ui.clipping,type_='info')
@@ -212,7 +240,8 @@ class AlertsView(v.Card):
             )
         
         self.alert.add_msg(msg, type_='success')
-    
+        
+        self.download_btn.disabled=False
     
     def filter_confidence(self, change):
         """Filter alert list by confidence"""

@@ -1,4 +1,5 @@
 import json
+import pytz
 from datetime import datetime
 import urllib
 from pathlib import Path
@@ -13,6 +14,7 @@ from shapely.geometry import Polygon
 from traitlets import Any, Unicode, Int
 from ipyleaflet import GeoJSON
 
+from sepal_ui.scripts.utils import random_string
 from sepal_ui import model
 
 from component.parameter import *
@@ -23,7 +25,7 @@ class AlertModel(model.Model):
 
 
     # Input parameters
-    timespan = Unicode("24 hours").tag(sync=True)
+    timespan = Unicode("24h").tag(sync=True)
 
     # Planet parameters
 
@@ -58,13 +60,30 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
+        
+    def get_alerts_name(self):
+        """Create an output name for the aoi alerts"""
+        
+        now = datetime.now(tz=pytz.timezone('UTC'))
+        now = now.strftime('%h%m')+random_string()
+        
+        method = f'custom_draw' if not self.country else self.country
+        
+        if self.alerts_type == 'recent':
+            acq_date = f'last{self.timespan}' 
+        else:
+            acq_date = f'from{self.start_date}_to{self.start_date}'
+            
+        return f'{now}_{self.satsource}_{method}_{acq_date}'
+        
 
     def download_alerts(self):
         """Download the corresponding alerts based on the selected alert type"""
         
         if self.alerts_type == "recent":
             # Donwload recent alerts
-            url = self.get_url(self.satsource)
+            url = self.get_url()
+            print(url)
             df = pd.read_csv(url)
             
         else:
@@ -141,15 +160,12 @@ class AlertModel(model.Model):
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
 
-    def get_url(self, satellite):
+    def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
-        sat = SATSOURCE[satellite]
+        sat = SATSOURCE[self.satsource]
 
-        timespan = self.timespan.replace(" hours", "h").replace(" days", "d")
-        url = RECENT_URL.format(sat[1], sat[0], timespan)
-
-        return url
+        return RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
         """Clip recent or historical geodataframe with area of interest"""
@@ -181,7 +197,6 @@ class AlertModel(model.Model):
         # Divide alerts into confidence categories
         
         def get_color(feature):
-            import random
             confidence = feature['properties']['confidence']
             color = cs.get_confidence_color(self.satsource, confidence)
             return {
