@@ -47,7 +47,8 @@
         "hour24": "24 hours",
         "hour48": "48 hours",
         "day7": "7 days",
-        "exported":"Alerts successfully exported in {} folder as {}.shp."
+        "exported": "Alerts successfully exported in {} folder as {}.shp.",
+        "overloaded" : "There are {} alerts for the given AOI and date ranges. The map will not display them, you might want download them with the 'download button' or reduce the AOI/date range to get less than {} alerts."
     },
     "planet" : {
         "card_title": "Planet imagery settings",

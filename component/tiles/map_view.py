@@ -81,7 +81,17 @@ class AlertMap(m.SepalMap):
         self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
         self.metadata_btn.on_click(lambda *args: self.metadata_table.toggle_viz())
         
+        self.model.observe(self.reset, 'reset')
         
+    def reset(self, change):
+        """Remove all alerts from the map view"""
+
+        if change['new'] is True:
+            # Remove previous alert layers
+            self.remove_layers_if('name', equals_to='Alerts')
+            self.w_alerts.reset()
+            self.metadata_table.reset()
+            
     def add_widget_as_control(self, widget, position, first=False):
         """Add widget as control in the given position
 
@@ -120,8 +130,6 @@ class AlertMap(m.SepalMap):
             self.model.aoi_geometry = {"type": "FeatureCollection", "features": []}
 
             self.model.aoi_geometry["features"].append(geo_json)
-
-    #             self.model.aoi_geometry = geo_json['geometry']
 
     def remove_layers_if(self, prop, equals_to, _metadata=False):
         """Remove layers with a given property and value
@@ -165,10 +173,3 @@ class AlertMap(m.SepalMap):
                 marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
                 self.add_layer(marker)
-
-    def restore_widgets(self):
-
-        self.w_run.disabled = False
-        self.w_run.loading = False
-        self.w_alerts.items = []
-        self.w_alerts.v_model = None

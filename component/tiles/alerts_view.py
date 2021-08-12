@@ -1,5 +1,6 @@
 import pytz
 import datetime
+import warnings
 from numpy import float64
 
 from ipywidgets import Output
@@ -11,7 +12,7 @@ from sepal_ui.scripts import utils as su
 from component.message import cm
 from component.scripts.scripts import *
 from component.widget import *
-from component.parameter import SATSOURCE, TIME_SPAN
+from component.parameter import SATSOURCE, TIME_SPAN, MAX_ALERTS
 
 
 class AlertsView(v.Card):
@@ -126,6 +127,7 @@ class AlertsView(v.Card):
         
         self.btn.on_event('click', self.get_alerts)
         self.download_btn.on_event('click', self.write_alerts)
+    
         
     def write_alerts(self, *args):
         """Write AOI alerts into a shapefile on the module results"""
@@ -142,7 +144,9 @@ class AlertsView(v.Card):
         
         
     def get_sat_sources(self):
-        """Get the corresponding satellites depending on the alerts type"""
+        """Get the corresponding items for the satellite source dropdown widget
+        depending on the alerts type
+        """
         
         if self.model.alerts_type == 'recent':
             self.w_satellite.items = [
@@ -193,6 +197,9 @@ class AlertsView(v.Card):
         
         """
         
+        # reset the model values
+        self.model.reset = True
+        
         self.download_btn.disabled=True
         
         if not self.model.aoi_geometry:
@@ -211,38 +218,48 @@ class AlertsView(v.Card):
         
         # Clip alerts_gdf to the selected aoi
         self.alert.add_msg(msg=cm.ui.clipping,type_='info')
+        
         self.model.aoi_alerts = self.model.clip_to_aoi()
         
-        # Update map dropdown alerts
-        self.map_.w_alerts.items = list(self.model.aoi_alerts.index)
-        self.map_.w_alerts.w_conf.items = self.model.get_confidence_items()
+        # If there are more alerts thatn the threhsold, avoid display them
+        # into the map
+            
+        if len(self.model.aoi_alerts) <= MAX_ALERTS:
+            
+            # Update map dropdown alerts
+            self.map_.w_alerts.items = list(self.model.aoi_alerts.index)
+            self.map_.w_alerts.w_conf.items = self.model.get_confidence_items()
+
+            # Convert aoi alert points into squares
+            square_alerts = self.model.alerts_to_squares()
+
+            # Add layer  into the map
+            self.map_ + square_alerts
+
+            self.map_.w_alerts.disabled = False
+            self.map_.w_alerts.show()
+
+            if self.model.alerts_type == 'recent':
+                msg = cm.ui.alert_number.format(
+                    len(self.model.aoi_alerts), self.model.timespan
+                )
+            else:
+                msg = cm.ui.historic.alert_number.format(
+                    len(self.model.aoi_alerts), 
+                    self.model.start_date,
+                    self.model.end_date,
+                )
+
+            self.alert.add_msg(msg, type_='success')
         
-        # Remove previous alert layers
-        self.map_.remove_layers_if('name', equals_to='Alerts')
-        
-        # Convert aoi alert points into squares
-        square_alerts = self.model.alerts_to_squares()
-        
-        # Add layer  into the map
-        self.map_ + square_alerts
-        
-        self.map_.w_alerts.disabled = False
-        self.map_.w_alerts.show()
-        
-        if self.model.alerts_type == 'recent':
-            msg = cm.ui.alert_number.format(
-                len(self.model.aoi_alerts), self.model.timespan
-            )
         else:
-            msg = cm.ui.historic.alert_number.format(
-                len(self.model.aoi_alerts), 
-                self.model.start_date,
-                self.model.end_date,
+            warnings.warn(
+                cm.alerts.overloaded.format(len(self.model.aoi_alerts), MAX_ALERTS)
             )
-        
-        self.alert.add_msg(msg, type_='success')
         
         self.download_btn.disabled=False
+        
+        self.model.reset = False
     
     def filter_confidence(self, change):
         """Filter alert list by confidence"""
@@ -304,25 +321,25 @@ class AlertsView(v.Card):
         """ Update map zoom, center when selecting an alert
         and add metadata to map
         """
-        
-        # Get fire alert id
-        self.model.current_alert = change['new']
-        
-        # Filter dataframe to get lat,lon
-        self.map_.lat = self.model.aoi_alerts.loc[
-            self.model.current_alert
-        ]['latitude']
-        
-        self.map_.lon = self.model.aoi_alerts.loc[
-            self.model.current_alert
-        ]['longitude']
-        
-        self.map_.center=((self.map_.lat, self.map_.lon))
-        self.map_.zoom=15
-        self._get_metadata(self.model.current_alert)
-        
-        # Search and add layers to map
-        if self.model.valid_api: self.planet.add_planet_imagery()
+        if self.model.reset is False:
+            # Get fire alert id
+            self.model.current_alert = change['new']
+
+            # Filter dataframe to get lat,lon
+            self.map_.lat = self.model.aoi_alerts.loc[
+                self.model.current_alert
+            ]['latitude']
+
+            self.map_.lon = self.model.aoi_alerts.loc[
+                self.model.current_alert
+            ]['longitude']
+
+            self.map_.center=((self.map_.lat, self.map_.lon))
+            self.map_.zoom=15
+            self._get_metadata(self.model.current_alert)
+
+            # Search and add layers to map
+            if self.model.valid_api: self.planet.add_planet_imagery()
             
             
 

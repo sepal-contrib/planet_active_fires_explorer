@@ -11,7 +11,7 @@ import pandas as pd
 import geopandas as gpd
 from shapely.geometry import Polygon
 
-from traitlets import Any, Unicode, Int
+from traitlets import Any, Bool, Unicode, Int, observe
 from ipyleaflet import GeoJSON
 
 from sepal_ui.scripts.utils import random_string
@@ -23,7 +23,9 @@ import component.scripts.scripts as cs
 
 class AlertModel(model.Model):
 
-
+    # If changed, propagate the status to all the tiles that are listening.
+    reset = Bool(False).tag(sync=True)
+    
     # Input parameters
     timespan = Unicode("24h").tag(sync=True)
 
@@ -60,6 +62,15 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
+    
+    @observe('reset')    
+    def reset_alerts(self, change):
+        """Remove previous downloaded alerts"""
+
+        if change['new'] is True:
+            self.alerts = None
+            self.aoi_alerts = None
+            self.current_alert = None
         
     def get_alerts_name(self):
         """Create an output name for the aoi alerts"""
@@ -181,6 +192,7 @@ class AlertModel(model.Model):
         return alerts[alerts.geometry.intersects(clip_geometry)]
 
     def alerts_to_squares(self):
+        """Convert the point alerts into square polygons to display on map"""
 
         # Convert alert's geometries to 54009 (projected crs)
         # and use 375m as buffer
@@ -190,7 +202,7 @@ class AlertModel(model.Model):
             .copy()
         )
 
-        self.aoi_alerts = self.aoi_alerts.assign(geometry=geometry_col)
+        square_alerts = self.aoi_alerts.assign(geometry=geometry_col)
         
         # Divide alerts into confidence categories
         
@@ -202,7 +214,7 @@ class AlertModel(model.Model):
                 'fillColor': color,
             } 
         
-        json_aoi_alerts = json.loads(self.aoi_alerts.to_crs('EPSG:4326').to_json())
+        json_aoi_alerts = json.loads(square_alerts.to_crs('EPSG:4326').to_json())
 
         return GeoJSON(
             data=json_aoi_alerts,

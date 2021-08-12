@@ -161,6 +161,16 @@ class DynamicSelect(v.Card, SepalWidget):
             if position > 0:
                 self.w_list.v_model = self.w_list.items[position - 1]
                 
+    def reset(self):
+        """Restore widgets and values to default"""
+        
+        self.items = []
+        self.v_model = ''
+        self.confidence = 'All'
+        
+        self.w_conf.items = []
+        
+                
 
 class AlertMenu(v.Menu):
 
@@ -266,4 +276,9 @@ class MetadataTable(v.Card, SepalWidget):
         self.children = [self.title] + [
             v.SimpleTable(dense=True, children=[v.Html(tag='tbody', children=rows)])
         ]
+    
+    def reset(self):
+        """Create an empty table"""
+        
+        self.children=[]
         

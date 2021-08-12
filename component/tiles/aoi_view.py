@@ -101,8 +101,6 @@ class AoiView(v.Card):
                 }
             )
 
-    #         self.model.aoi_geometry = aoi.data['features'][0]['geometry']
-
             bounds = geometry.bounds
 
             self.map_.zoom_bounds(bounds)

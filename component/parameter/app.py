@@ -30,3 +30,7 @@ TIME_SPAN = {
 }
 
 BAR_FORMAT='{l_bar}{bar}{n_fmt}/{total_fmt}'
+
+
+# Maxiumum number of alerts to display on the map
+MAX_ALERTS = 20000
