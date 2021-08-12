@@ -15,10 +15,10 @@ from component.message import cm
 
 CHIPS = {
     # The key is the name attribute name in the model : [name, icon, unit]
-    'max_images' : ['Max number of images', 'mdi-checkbox-multiple-blank', 'img'],
-    'days_before' : ['Search up to days before', 'mdi-arrow-left-circle', 'd'],
-    'days_after' : ['Search up to days after', 'mdi-arrow-right-circle', 'd'],
-    'cloud_cover' : ['Max cloud cover threshold', 'mdi-cloud', '%'],
+    'max_images' : [cm.planet.chips.max_images, 'mdi-checkbox-multiple-blank', 'img'],
+    'days_before' : [cm.planet.chips.days_before, 'mdi-arrow-left-circle', 'd'],
+    'days_after' : [cm.planet.chips.days_after, 'mdi-arrow-right-circle', 'd'],
+    'cloud_cover' : [cm.planet.chips.cloud_cover, 'mdi-cloud', '%'],
 }
 
 class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
@@ -27,7 +27,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         
         # link with model
         self.model = model
-        self.title = 'Advanced settings: '
+        self.title = f'{cm.planet.advanced_title}: '
         
         # create a header, and display the default values
         self.header = v.ExpansionPanelHeader()
@@ -92,33 +92,33 @@ class PlanetView(v.Card, sw.SepalWidget):
         self.client = None
         
         self.w_api_alert = sw.Alert(
-            children=[cm.ui.default_api], 
+            children=[cm.planet.default_api], 
             type_='info'
         ).show()
         
         self.w_api_key = sw.PasswordField(
-            label=cm.ui.insert_api,
+            label=cm.planet.insert_api,
             v_model=self.model.api_key
         )
         
-        self.w_api_btn = sw.Btn('Check ', small=True,)
+        self.w_api_btn = sw.Btn(cm.planet.check_btn, small=True,)
         
         self.w_days_before = sw.NumberField(
-            label=cm.ui.days_before,
+            label=cm.planet.label.days_before,
             max_=5,
             v_model=self.model.days_before,
             disabled=True
         )
         
         self.w_days_after = sw.NumberField(
-            label=cm.ui.days_after,
+            label=cm.planet.label.days_after,
             max_=5,
             v_model=self.model.days_after,
             disabled=True
         )
         
         self.w_max_images = sw.NumberField(
-            label=cm.ui.max_images,
+            label=cm.planet.label.max_images,
             max_=6,
             min_=1,
             v_model=self.model.max_images,
@@ -126,7 +126,7 @@ class PlanetView(v.Card, sw.SepalWidget):
         )
         
         self.w_cloud_cover = v.Slider(
-            label=cm.ui.cloud_cover,
+            label=cm.planet.label.cloud_cover,
             thumb_label=True,
             v_model=self.model.cloud_cover,
             disabled=True
@@ -158,7 +158,7 @@ class PlanetView(v.Card, sw.SepalWidget):
         self.w_api_btn.on_event('click', self.validate_api_event)
         
         self.children = [
-            v.CardTitle(children=[cm.ui.planet_title]),
+            v.CardTitle(children=[cm.planet.card_title]),
             v.Flex(
                 class_='d-flex align-center mb-2', 
                 row=True, 
@@ -167,7 +167,6 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.w_api_alert,
             self.panels
         ]
-        
         
         # Interactions with Map
         self.map_.reload_btn.on_click(self.add_planet_imagery)
@@ -184,8 +183,8 @@ class PlanetView(v.Card, sw.SepalWidget):
             self.panels.children[0].shrunk_content()
 
     def _toggle_planet_setts(self, on=True):
+        """Toggle planet widgets"""
         
-
         for w in self.components:
             setattr(w, 'disabled', False)  if on else setattr(w, 'disabled', True)
 
@@ -203,11 +202,11 @@ class PlanetView(v.Card, sw.SepalWidget):
         
         if self.model.valid_api:
             self.w_api_alert.add_msg(
-                cm.ui.success_api.msg, cm.ui.success_api.type
+                cm.planet.success_api.msg, cm.planet.success_api.type
             )
             self._toggle_planet_setts(on=True)
         else:
-            self.w_api_alert.add_msg(cm.ui.fail_api.msg, cm.ui.fail_api.type)
+            self.w_api_alert.add_msg(cm.planet.fail_api.msg, cm.planet.fail_api.type)
             self._toggle_planet_setts(on=False)
 
     def _get_items(self):
@@ -266,17 +265,17 @@ class PlanetView(v.Card, sw.SepalWidget):
         
         if len(items_df) == 1:
             self.map_.w_state_bar.add_msg(
-                cm.ui.one_image.format(len(items_df)), 
+                cm.map.status.one_image.format(len(items_df)), 
                 loading=False
             )
         elif len(items_df):
             self.map_.w_state_bar.add_msg(
-                cm.ui.number_images.format(len(items_df)), 
+                cm.map.status.number_images.format(len(items_df)), 
                 loading=False
             )
         else:
             self.map_.w_state_bar.add_msg(
-                cm.ui.no_planet, 
+                cm.map.status.no_planet, 
                 loading=False
             )
         
@@ -294,9 +293,13 @@ class PlanetView(v.Card, sw.SepalWidget):
         # Validate whether Planet API Key is valid,
         # and if there is already selected coordinates.
         
+        if self.model.aoi_alerts is None:
+            self.map_.w_state_bar.add_msg(cm.map.status.no_alerts, loading=False)
+            return
+        
         if self.validate_state_bar():
             
-            self.map_.w_state_bar.add_msg(cm.ui.searching_planet, loading=True)
+            self.map_.w_state_bar.add_msg(cm.map.status.searching_planet, loading=True)
             
             items = self._get_items()
             
@@ -328,10 +331,10 @@ class PlanetView(v.Card, sw.SepalWidget):
     def validate_state_bar(self):
         
         if not self.model.valid_api:
-            self.map_.w_state_bar.add_msg(cm.ui.no_key, loading=False)
+            self.map_.w_state_bar.add_msg(cm.planet.no_key, loading=False)
             
         elif not all((self.model.valid_api, self.map_.lat, self.map_.lon)):
-            self.map_.w_state_bar.add_msg(cm.ui.no_latlon, loading=False)
+            self.map_.w_state_bar.add_msg(cm.planet.no_latlon, loading=False)
             
         else:
             return True

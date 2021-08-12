@@ -57,8 +57,17 @@ class PanelTile(v.Card, sw.SepalWidget):
         self.close.on_event('click', lambda *args: self.hide())
         
         # Open dialog when map parameters button is clicked
-        self.map_.parameters_btn.on_click(lambda *args: self.toggle_viz())
+        self.map_.parameters_btn.on_click(self.parameters_btn_event)
         
+    def parameters_btn_event(self, *args):
+        """Toggle visualization of parameters panel and hide metadata if is 
+        visible
+        """
+        
+        self.toggle_viz()
+        
+        if self.viz == True: self.map_.metadata_table.hide()
+
         
 
         

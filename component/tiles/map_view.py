@@ -50,11 +50,19 @@ class AlertMap(m.SepalMap):
             ),
         )
         
+        self.metadata_btn = Button(
+            tooltip="Fire alert metadata",
+            icon="info",
+            layout=Layout(
+                width="30px", height="30px", line_height="30px", padding="0px"
+            ),
+        )
+        
         self.w_alerts = DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = sepal_darker
-
-        self.metadata_output = Output()
+        
+        self.metadata_table = MetadataTable()
 
         # Add widget as control to the map
         self.add_widget_as_control(self.reload_btn, "topright", first=True)
@@ -62,14 +70,18 @@ class AlertMap(m.SepalMap):
         self.add_widget_as_control(self.parameters_btn, "topleft")
         self.add_widget_as_control(self.w_alerts, "topright", first=True)
         self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
-        self.add_widget_as_control(self.metadata_output, "bottomright")
-
+        self.add_widget_as_control(self.metadata_btn, "topright")
+        self.add_widget_as_control(self.metadata_table, "bottomright")
+        
         # Map interactions
         self.dc.on_draw(self.handle_draw)
         self.on_interaction(self._return_coordinates)
-        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
         
-
+        # show/hide elements
+        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
+        self.metadata_btn.on_click(lambda *args: self.metadata_table.toggle_viz())
+        
+        
     def add_widget_as_control(self, widget, position, first=False):
         """Add widget as control in the given position
 
@@ -132,24 +144,27 @@ class AlertMap(m.SepalMap):
                         self.remove_layer(layer)
 
     def _return_coordinates(self, **kwargs):
+        
+        # Only active when method different to draw and there is a valid key
+        if all ([self.model.aoi_method != 'draw', self.model.valid_api]):
 
-        if kwargs.get("type") == "click":
+            if kwargs.get("type") == "click":
 
-            # Remove markdown if there is one
-            self.remove_layers_if("type", equals_to="manual", _metadata=True)
+                # Remove markdown if there is one
+                self.remove_layers_if("type", equals_to="manual", _metadata=True)
 
-            self.lat, self.lon = kwargs.get("coordinates")
+                self.lat, self.lon = kwargs.get("coordinates")
 
-            marker = Marker(
-                location=kwargs.get("coordinates"),
-                alt="Manual",
-                title="Manual",
-                draggable=False,
-                name="Manual marker",
-            )
-            marker.__setattr__("_metadata", {"type": "manual", "id": None})
+                marker = Marker(
+                    location=kwargs.get("coordinates"),
+                    alt="Manual",
+                    title="Manual",
+                    draggable=False,
+                    name="Manual marker",
+                )
+                marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
-            self.add_layer(marker)
+                self.add_layer(marker)
 
     def restore_widgets(self):
 

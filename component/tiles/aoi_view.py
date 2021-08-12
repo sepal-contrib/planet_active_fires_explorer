@@ -35,18 +35,23 @@ class AoiView(v.Card):
         
         self.w_aoi_method = Select(
             label=cm.ui.aoi_method,
-            v_model='Draw on map',
-            items=['Draw on map', 'Select country'],
-            
+            v_model='draw',
+            items=[
+                {'text':cm.aoi.method.draw, 'value':'draw'},
+                {'text':cm.aoi.method.country, 'value':'country'}
+            ]
         )
+        
         self.w_countries = Select(
-            label="Select country",
+            label=cm.aoi.method.country,
             v_model='',
             items=COUNTRIES.name.to_list(),
         ).hide()
         
         # Bind selected parameters
-        self.model.bind(self.w_countries, 'country')
+        self.model.bind(self.w_countries, 'country')\
+            .bind(self.w_aoi_method, 'aoi_method')
+        
         
         self.children=[
             self.w_aoi_method,
@@ -61,12 +66,13 @@ class AoiView(v.Card):
         
         self.map_.remove_layers()
         
-        if change['new'] == 'Select country':
+        if change['new'] == 'country':
             self.map_.hide_dc()
             su.show_component(self.w_countries)
 
         else:
             su.hide_component(self.w_countries)
+            self.w_countries.v_model=''
             self.map_.show_dc()
             
     def add_country_event(self, change):
@@ -74,29 +80,31 @@ class AoiView(v.Card):
         
         self.map_.remove_layers()
         
-        country_df = COUNTRIES[COUNTRIES['name']==change['new']]
-        geometry =  country_df.iloc[0].geometry
+        if change['new']:
         
-        lon, lat = [xy[0] for xy in geometry.centroid.xy]
-        
-        data = json.loads(country_df.to_json())
-        
-        self.model.aoi_geometry = data
-        
-        aoi = GeoJSON(
-            data=data,
-            name=change['new'], 
-            style={
-                'color': 'green',
-                'fillOpacity': 0, 
-                'weight': 3
-            }
-        )
-            
-#         self.model.aoi_geometry = aoi.data['features'][0]['geometry']
-        
-        bounds = geometry.bounds
+            country_df = COUNTRIES[COUNTRIES['name']==change['new']]
+            geometry =  country_df.iloc[0].geometry
 
-        self.map_.zoom_bounds(bounds)
-        self.map_.center = (lat, lon)
-        self.map_.add_layer(aoi)
+            lon, lat = [xy[0] for xy in geometry.centroid.xy]
+
+            data = json.loads(country_df.to_json())
+
+            self.model.aoi_geometry = data
+
+            aoi = GeoJSON(
+                data=data,
+                name=change['new'], 
+                style={
+                    'color': 'green',
+                    'fillOpacity': 0, 
+                    'weight': 3
+                }
+            )
+
+    #         self.model.aoi_geometry = aoi.data['features'][0]['geometry']
+
+            bounds = geometry.bounds
+
+            self.map_.zoom_bounds(bounds)
+            self.map_.center = (lat, lon)
+            self.map_.add_layer(aoi)
