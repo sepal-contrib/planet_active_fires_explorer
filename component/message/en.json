@@ -38,11 +38,18 @@
             "download_btn" : "Download"
         },
         "metadata" : {
+            "index" : "Alert Id",
             "latitude" : "Latitude",
             "longitude": "Longitude",
             "acq_date" : "Acq. date",
             "acq_time" : "Acq. time",
-            "confidence" : "Confidence"
+            "confidence" : "Confidence",
+            "validate" : "Validate",
+            "observation" : "Observation",
+            "items": {
+                "yes":"Yes",
+                "no":"Not"
+            }
         },
         "hour24": "24 hours",
         "hour48": "48 hours",

@@ -83,6 +83,9 @@ class AlertMap(m.SepalMap):
         
         self.model.observe(self.reset, 'reset')
         
+        self.metadata_table.observe(self.model.metadata_change, 'validate')
+        self.metadata_table.observe(self.model.metadata_change, 'observ')
+        
     def reset(self, change):
         """Remove all alerts from the map view"""
 

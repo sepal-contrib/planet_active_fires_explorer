@@ -62,6 +62,13 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
+        
+    def metadata_change(self, change):
+        """Edit 'validate' and 'confidence' columns in the current aoi geodataframe.
+        This event is trigged when metadata_table input values change
+        
+        """
+        self.aoi_alerts.loc[self.current_alert, change['name']] = change['new']
     
     @observe('reset')    
     def reset_alerts(self, change):
@@ -86,10 +93,27 @@ class AlertModel(model.Model):
             acq_date = f'from{self.start_date}_to{self.start_date}'
             
         return f'{now}_{self.satsource}_{method}_{acq_date}'
+    
+    def write_alerts(self):
+        """Write clipped alerts in a new ESRI shapefile on the module results 
+        directory"""
         
-
+        name = self.get_alerts_name()
+        
+        # Save shapefile files in a folder with the same name
+        folder = ALERTS_DIR/name
+        folder.mkdir(exist_ok=True, parents=True)
+        
+        output = ALERTS_DIR/folder/f'{name}.shp'
+        
+        # It will overwrite any previous created file.
+        self.aoi_alerts.to_file(output)
+        
+        return folder, name
+    
     def download_alerts(self):
-        """Download the corresponding alerts based on the selected alert type"""
+        """Download the corresponding alerts based on the selected alert type
+        """
         
         if self.alerts_type == "recent":
             # Donwload recent alerts
@@ -177,10 +201,11 @@ class AlertModel(model.Model):
         return RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
-        """Clip recent or historical geodataframe with area of interest"""
+        """Clip recent or historical geodataframe with area of interest and save it"""
 
         if not self.aoi_geometry:
             raise Exception(cm.ui.valid_aoi)
+
         alerts = self.alerts
         clip_geometry = (
             gpd.GeoDataFrame.from_features(self.aoi_geometry)
@@ -188,8 +213,27 @@ class AlertModel(model.Model):
             .iloc[0]
             .geometry
         )
+        
+        self.aoi_alerts = alerts[
+            alerts.geometry.intersects(clip_geometry)
+        ].copy()
+        
+    def format_gdf(self):
+        """Reformat alerts aoi geodataframe to fit with the outputs needs.
+        We are doing this here because we don't want to format needlessly the 
+        whole geodataframe.
+        """
+        
+        # Create two new columns for user's inputs
+        self.aoi_alerts['validate'] = 'not'
+        self.aoi_alerts['observ']  = ''
+        
+        def parse(time):
+            """Parse int time into string formated time"""
+            time = str(time)
+            return f'{time[:-2]}:{time[-2:]}'
 
-        return alerts[alerts.geometry.intersects(clip_geometry)]
+        self.aoi_alerts['acq_time'] = self.aoi_alerts.acq_time.apply(parse)
 
     def alerts_to_squares(self):
         """Convert the point alerts into square polygons to display on map"""

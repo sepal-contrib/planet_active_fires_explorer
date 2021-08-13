@@ -34,3 +34,15 @@ BAR_FORMAT='{l_bar}{bar}{n_fmt}/{total_fmt}'
 
 # Maxiumum number of alerts to display on the map
 MAX_ALERTS = 20000
+
+# Columns to be retreived in the 
+METADATA_ROWS = {
+    'index':cm.alerts.metadata.index,
+    'latitude':cm.alerts.metadata.latitude,
+    'longitude':cm.alerts.metadata.longitude,
+    'acq_date':cm.alerts.metadata.acq_date,
+    'acq_time':cm.alerts.metadata.acq_time,
+    'confidence':cm.alerts.metadata.confidence,
+    'validate':cm.alerts.metadata.validate, 
+    'observ':cm.alerts.metadata.observation
+}
