@@ -2,7 +2,8 @@ import ipyvuetify as v
 from traitlets import Unicode, List, Int, Any, link
 
 from sepal_ui.sepalwidgets import SepalWidget
-from component.parameter import CONFIDENCE
+from component.parameter import *
+from component.message import cm
 import component.scripts.scripts as cs
 
 
@@ -234,9 +235,12 @@ class Tabs(v.Card):
 
 class MetadataTable(v.Card, SepalWidget):
     """Widget to get a simple table displaying the metadata of the alerts"""
+    
+    validate = Unicode('').tag(sync=True)
+    observ = Unicode('').tag(sync=True)
 
     def __init__(self, *args, **kwargs):
-
+        self.max_width='250px'
 
         # Create table
         super().__init__(*args, **kwargs)
@@ -245,6 +249,19 @@ class MetadataTable(v.Card, SepalWidget):
         self.title = v.CardTitle(class_='pa-0 ma-0', children=[v.Spacer(), self.close])
                 
         self.close.on_event('click', lambda *args: self.hide())
+        
+        self.w_validate = v.Select(
+            items=[
+                {'text':cm.alerts.metadata.items.yes, 'value':'yes'},
+                {'text':cm.alerts.metadata.items.no, 'value':'not'}
+            ], 
+            dense=True, 
+            v_model=self.validate
+        )
+        self.w_observ = v.Textarea(dense=True, rows=2, v_model=self.observ)
+        
+        link((self, 'validate'), (self.w_validate, 'v_model'))
+        link((self, 'observ'), (self.w_observ, 'v_model'))
         
 
     def update(self, satsource, data):
@@ -257,14 +274,22 @@ class MetadataTable(v.Card, SepalWidget):
         
         def get_row(header, value):
 
-            if header == 'Confidence: ':
+            if header == 'confidence':
                 value = v.Chip(
                     small=True, 
                     color=cs.get_confidence_color(satsource, value), 
                     children=[value]
                 )
+            
+            elif header == 'validate':
+                self.w_validate.v_model = value
+                value = self.w_validate
+            
+            elif header == 'observ':
+                self.w_observ.v_model = value
+                value = self.w_observ
                 
-            return [v.Html(tag='th', children=[header])] + [
+            return [v.Html(tag='th', children=[f'{METADATA_ROWS[header]}: '])] + [
                 v.Html(tag='td', children=[value])
             ]
 

@@ -12,7 +12,7 @@ from sepal_ui.scripts import utils as su
 from component.message import cm
 from component.scripts.scripts import *
 from component.widget import *
-from component.parameter import SATSOURCE, TIME_SPAN, MAX_ALERTS
+from component.parameter import *
 
 
 class AlertsView(v.Card):
@@ -132,14 +132,11 @@ class AlertsView(v.Card):
     def write_alerts(self, *args):
         """Write AOI alerts into a shapefile on the module results"""
         
-        name = self.model.get_alerts_name()
-        output = ALERTS_DIR/f'{name}.shp'
-        
-        # It will overwrite any previous created file.
-        self.model.aoi_alerts.to_file(output)
+
+        folder, name = self.model.write_alerts()
         
         self.alert.add_msg(
-            msg=cm.alerts.exported.format(ALERTS_DIR, name),type_='success'
+            msg=cm.alerts.exported.format(ALERTS_DIR/folder, name),type_='success'
         )
         
         
@@ -197,7 +194,7 @@ class AlertsView(v.Card):
         
         """
         
-        # reset the model values
+        # reset model values
         self.model.reset = True
         
         self.download_btn.disabled=True
@@ -219,7 +216,10 @@ class AlertsView(v.Card):
         # Clip alerts_gdf to the selected aoi
         self.alert.add_msg(msg=cm.ui.clipping,type_='info')
         
-        self.model.aoi_alerts = self.model.clip_to_aoi()
+        self.model.clip_to_aoi()
+        
+        # Reformat geodataframe
+        self.model.format_gdf()
         
         # If there are more alerts thatn the threhsold, avoid display them
         # into the map
@@ -289,20 +289,17 @@ class AlertsView(v.Card):
         
         
     def _get_metadata(self, alert_id):
-        """Get a metadata table of alert and display as control"""
+        """Get a metadata table of alert and display as control widget on map
         
-        col_names = {
-            'latitude':cm.alerts.metadata.latitude,
-            'longitude':cm.alerts.metadata.longitude,
-            'acq_date':cm.alerts.metadata.acq_date,
-            'acq_time':cm.alerts.metadata.acq_time,
-            'confidence':cm.alerts.metadata.confidence
-        }
+        Args:
+            alert_id (str): Current alert id index
+        """
+        
         
         headers, values = list(zip(*[
-            (f'{col_name.capitalize()}: ',
-            self.model.aoi_alerts.loc[alert_id, col]) 
-            for col, col_name  in col_names.items()
+            (col_name,
+            self.model.aoi_alerts.loc[alert_id, col_name]) 
+            for col_name in METADATA_ROWS
         ]))
 
         values=[
