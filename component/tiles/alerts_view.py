@@ -232,6 +232,11 @@ class AlertsView(v.Card):
 
             # Convert aoi alert points into squares
             square_alerts = self.model.alerts_to_squares()
+            
+            # Create an event for the alerts
+            def geojson_callback(**kwargs):
+                self.map_.w_alerts.v_model=int(kwargs['id'])
+            square_alerts.on_click(geojson_callback)
 
             # Add layer  into the map
             self.map_ + square_alerts
@@ -315,9 +320,9 @@ class AlertsView(v.Card):
         self.map_.metadata_table.update(self.model.satsource, data)
 
     def alert_list_event(self, change):
-        """ Update map zoom, center when selecting an alert
-        and add metadata to map
-        """
+        """ Update map zoom, center when selecting an alert and add metadata to
+        map"""
+        
         if self.model.reset is False:
             # Get fire alert id
             self.model.current_alert = change['new']
