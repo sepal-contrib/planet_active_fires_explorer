@@ -96,10 +96,10 @@ class DynamicSelect(v.Card, SepalWidget):
 
     def __init__(self, label='', **kwargs):
 
-        self.row = True
         self.label = label
         self.dense=True
-
+        self.max_width='520'
+        
         super().__init__(**kwargs)
         
 
@@ -119,28 +119,36 @@ class DynamicSelect(v.Card, SepalWidget):
         )
         self.w_conf = v.Select(
             x12s=True,
-            class_='ma-2',
+            class_='mt-4',
+            dense=True,
             label='Confidence',
             v_model='All',
         )
 
         self.w_list = v.Select(
-            class_='ma-2', label=self.label, items=self.items, v_model=''
+            class_='mt-4 ml-2', 
+            label=self.label, 
+            items=self.items, 
+            v_model='',
+            dense=True,
         )
-
+        
+        widgets = [self.w_prev,self.w_conf,self.w_list,self.w_next]
+        
         self.children = [
-#             title,
-            v.Flex(
-                class_ = 'd-flex align-center',
+            v.Row(
+                no_gutters =True,
+                align='center',
                 children=[
-                    self.w_prev, 
-                    self.w_conf, 
-                    self.w_list, 
-                    self.w_next
+                    v.Col(
+                        cols=f'{col}',
+                        class_='text-center',
+                        children=[widget]
+                    ) for col, widget in zip([2,3,5,2], widgets)
                 ]
             )
         ]
-
+        
         link((self.w_list, 'items'), (self, 'items'))
         link((self.w_list, 'v_model'), (self, 'v_model'))
         link((self.w_conf, 'v_model'), (self, 'confidence'))
