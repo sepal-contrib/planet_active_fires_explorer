@@ -17,8 +17,8 @@ The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Are
 
 .. tip:: The settings panel can be open/closed by clicking on the settings |settings| button.
 
-1. Connect your Planet API Key
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Connect your Planet API Key
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. note:: This step is optional but highly recommended. Although you can go through the next tabs and get the fire alerts from the different satellite sources, to get the most advantage of the module, you will need a Planet API Key with access to daily imagery. 
 
@@ -26,19 +26,19 @@ The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Are
 
 .. tip:: use the planet state bar located in the top-left corner to get useful messages related with planet imagery, such as problems with the key or number of images loaded.
 
-  - Open the Advanced settings panel
-  
-    - :code:`Max number of images`: maximum number of planet images to be displayed at once in each alert.
-    - :code:`Search up to 'x' days before`: the number of days before the fire alert date to look up for the best image available.
-    - :code:`Search up to 'x' days after`: the number of days after the fire alert date to look up for the best image available.
-    - :code:`Cloud cover threshold`: maximum cloud cover threshold accepted in the images (based on the planet metadata).
+- Open the Advanced settings panel
+
+  - :code:`Max number of images`: maximum number of planet images to be displayed at once in each alert.
+  - :code:`Search up to 'x' days before`: the number of days before the fire alert date to look up for the best image available.
+  - :code:`Search up to 'x' days after`: the number of days after the fire alert date to look up for the best image available.
+  - :code:`Cloud cover threshold`: maximum cloud cover threshold accepted in the images (based on the planet metadata).
    
  
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/planet.gif
    :align: center
 
-2. Select area of interest (AOI)
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Select area of interest (AOI)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The module has two options to select an area of interest to filter alerts.
 
@@ -47,8 +47,8 @@ The module has two options to select an area of interest to filter alerts.
   
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/aoi.gif
    
-3. Get fire alerts
-^^^^^^^^^^^^^^^^^^
+Get fire alerts
+^^^^^^^^^^^^^^^
 
 - Recent: the products to be downloaded are coming from the Moderate Resolution Imaging Spectroradiometer (MODIS) and the Visible Infrared Imaging Radiometer Suite (VIIRS) for the last 24, 28 hours, and the last 7 days.
 
