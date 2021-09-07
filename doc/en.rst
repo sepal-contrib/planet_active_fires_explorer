@@ -66,7 +66,7 @@ Once the alerts are being displayed on the map, you will be able to navigate thr
   The confidence value was added to help users gauge the quality of individual fire pixels is included in the Level 2 fire product. The confidence field should be used with caution; it will likely vary in meaning in different parts of the world. Nevertheless, some of our end users have found such a field to be useful in excluding false-positive occurrences of fire. They are different for MODIS and VIIRS.
 
 
-.. image:: https://github.com/dfguerrerom/planet_active_fires_explorer/blob/main/doc/gif/alerts_navigation.gif
+.. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/alerts_navigation.gif
 
 .. tip:: You can activate/deactivate the firee navigation widget by clicking over the fires |fires| button.
 
