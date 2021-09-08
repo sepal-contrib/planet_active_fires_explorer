@@ -8,12 +8,13 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
-
 from component.message import cm
-from component.parameter import *
-from component.widget import *
+import component.parameter as param
+import component.widget as cw
 
-COUNTRIES = gpd.read_file(COUNTRIES_JSON)
+__all__ = ['AoiView']
+
+COUNTRIES = gpd.read_file(param.COUNTRIES_JSON)
 
 class AoiView(v.Card):
     
@@ -33,7 +34,7 @@ class AoiView(v.Card):
         
         self.model = model
         
-        self.w_aoi_method = Select(
+        self.w_aoi_method = cw.Select(
             label=cm.ui.aoi_method,
             v_model='draw',
             items=[
@@ -42,7 +43,7 @@ class AoiView(v.Card):
             ]
         )
         
-        self.w_countries = Select(
+        self.w_countries = cw.Select(
             label=cm.aoi.method.country,
             v_model='',
             items=COUNTRIES.name.to_list(),

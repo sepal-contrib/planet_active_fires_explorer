@@ -1,8 +1,11 @@
+import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 
 from component.model import AlertModel
-from component.tiles import *
+from component.tiles import PlanetView, AoiView, AlertsView
+from component.widget import Tabs
 
+__all__ = ['PanelTile']
 
 class PanelTile(v.Card, sw.SepalWidget):
     
@@ -20,7 +23,6 @@ class PanelTile(v.Card, sw.SepalWidget):
         self.class_ = 'pa-2'
         
         super().__init__(*args, **kwargs)
-        
         
         self.model = model
         self.map_ = map_

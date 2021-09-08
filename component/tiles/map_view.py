@@ -6,9 +6,9 @@ from sepal_ui import sepalwidgets as sw
 from sepal_ui.frontend.styles import sepal_darker
 
 from component.message import cm
-from component.scripts.scripts import *
-from component.widget.custom_widgets import *
+import component.widget as cw
 
+__all__ = ['AlertMap']
 
 class AlertMap(m.SepalMap):
     
@@ -58,11 +58,11 @@ class AlertMap(m.SepalMap):
             ),
         )
         
-        self.w_alerts = DynamicSelect(disabled=True).hide()
+        self.w_alerts = cw.DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = sepal_darker
         
-        self.metadata_table = MetadataTable()
+        self.metadata_table = cw.MetadataTable()
 
         # Add widget as control to the map
         self.add_widget_as_control(self.reload_btn, "topright", first=True)

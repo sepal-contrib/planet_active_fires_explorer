@@ -1,6 +1,13 @@
 from component.message import cm
 
-"""Include app parameters"""
+__all__ = [
+    'SATSOURCE',
+    'CONFIDENCE',
+    'TIME_SPAN',
+    'BAR_FORMAT',
+    'MAX_ALERTS',
+    'METADATA_ROWS'
+]
 
 SATSOURCE = {
     "viirs": ("SUOMI_VIIRS_C2", "suomi-npp-viirs-c2"),
@@ -29,8 +36,8 @@ TIME_SPAN = {
     '7d': cm.alerts.day7
 }
 
+# Specify format for the tqdm progress bar
 BAR_FORMAT='{l_bar}{bar}{n_fmt}/{total_fmt}'
-
 
 # Maxiumum number of alerts to display on the map
 MAX_ALERTS = 20000

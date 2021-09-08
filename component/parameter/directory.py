@@ -1,5 +1,13 @@
 from pathlib import Path
 
+__all__ = [
+    'base_dir',
+    'root_dir',
+    'data_dir',
+    'HISTORIC_DIR',
+    'ALERTS_DIR',
+]
+
 base_dir = Path('~', 'module_results').expanduser()
 root_dir = base_dir/'sepafe'
 

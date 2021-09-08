@@ -5,13 +5,16 @@ import pandas as pd
 from shapely_geojson import dumps
 
 from ipyleaflet import TileLayer
-
 import ipyvuetify as v
+
 import sepal_ui.sepalwidgets as sw
 
-from component.scripts.scripts import *
+import component.parameter as param
+from component.scripts.scripts import PlanetKey, build_request, get_items
 from component.model import AlertModel
 from component.message import cm
+
+__all__ = ['PlanetView']
 
 CHIPS = {
     # The key is the name attribute name in the model : [name, icon, unit]
@@ -313,7 +316,7 @@ class PlanetView(v.Card, sw.SepalWidget):
 
             for i, row in items_df.iterrows():
                 layer = TileLayer(
-                    url=PLANET_TILES_URL.format(
+                    url=param.PLANET_TILES_URL.format(
                         row.item_type, row.id, self.model.api_key
                     ),
                     name=f'{row.item_type}, {row.date}',

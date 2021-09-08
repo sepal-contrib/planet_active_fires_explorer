@@ -17,7 +17,7 @@ from ipyleaflet import GeoJSON
 from sepal_ui.scripts.utils import random_string
 from sepal_ui import model
 
-from component.parameter import *
+import component.parameter as param
 import component.scripts.scripts as cs
 
 
@@ -101,10 +101,10 @@ class AlertModel(model.Model):
         name = self.get_alerts_name()
         
         # Save shapefile files in a folder with the same name
-        folder = ALERTS_DIR/name
+        folder = param.ALERTS_DIR/name
         folder.mkdir(exist_ok=True, parents=True)
         
-        output = ALERTS_DIR/folder/f'{name}.shp'
+        output = param.ALERTS_DIR/folder/f'{name}.shp'
         
         # It will overwrite any previous created file.
         self.aoi_alerts.to_file(output)
@@ -138,11 +138,11 @@ class AlertModel(model.Model):
             for y in years:
 
                 # Verify if the files is not previously downloaded
-                out_file = HISTORIC_DIR / f"historic_{sat}_fires_{y}.zip"
+                out_file = param.HISTORIC_DIR / f"historic_{sat}_fires_{y}.zip"
                 
                 if not out_file.exists():
                     
-                    url = HISTORIC_URL.format(sat,y)
+                    url = param.HISTORIC_URL.format(sat,y)
                     response = getattr(urllib, 'request', urllib).urlopen(url)
                     with tqdm(
                         unit='B', 
@@ -150,7 +150,7 @@ class AlertModel(model.Model):
                         unit_divisor=1024, 
                         miniters=1,
                         desc='downloading...',
-                        bar_format=BAR_FORMAT,
+                        bar_format=param.BAR_FORMAT,
                         dynamic_ncols =True,
                         total=getattr(response, 'length')
                     ) as f:
@@ -173,7 +173,7 @@ class AlertModel(model.Model):
                             zip_file.infolist(),
                             desc='unzipping...',
                             dynamic_ncols =True,
-                            bar_format=BAR_FORMAT,
+                            bar_format=param.BAR_FORMAT,
                         )
                         if text_file.filename.endswith(".csv")
                     ]
@@ -196,9 +196,9 @@ class AlertModel(model.Model):
     def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
-        sat = SATSOURCE[self.satsource]
+        sat = param.SATSOURCE[self.satsource]
 
-        return RECENT_URL.format(sat[1], sat[0], self.timespan)
+        return param.RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
         """Clip recent or historical geodataframe with area of interest and save it"""
@@ -278,7 +278,7 @@ class AlertModel(model.Model):
         type_ = 'disc' if self.satsource=='modis' else 'cat'
                     
         confidence_by_sat = [
-            {'text':v[0], 'value':k} for k,v in CONFIDENCE[type_].items()
+            {'text':v[0], 'value':k} for k,v in param.CONFIDENCE[type_].items()
         ]
                 
         return ['All'] + confidence_by_sat

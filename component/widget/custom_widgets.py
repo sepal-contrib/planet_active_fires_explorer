@@ -2,9 +2,20 @@ import ipyvuetify as v
 from traitlets import Unicode, List, Int, Any, link
 
 from sepal_ui.sepalwidgets import SepalWidget
-from component.parameter import *
+import component.parameter as param
 from component.message import cm
 import component.scripts.scripts as cs
+
+__all__ = [
+    'Card',
+    'Flex',
+    'Select',
+    'DatePicker',
+    'DynamicSelect',
+    'AlertMenu',
+    'Tabs',
+    'MetadataTable'
+]
 
 
 class Card(v.Card, SepalWidget):
@@ -297,7 +308,7 @@ class MetadataTable(v.Card, SepalWidget):
                 self.w_observ.v_model = value
                 value = self.w_observ
                 
-            return [v.Html(tag='th', children=[f'{METADATA_ROWS[header]}: '])] + [
+            return [v.Html(tag='th', children=[f'{param.METADATA_ROWS[header]}: '])] + [
                 v.Html(tag='td', children=[value])
             ]
 

@@ -3,7 +3,15 @@ import requests
 from planet import api
 from planet.api import filters
 
-from component.parameter import *
+import component.parameter as param
+
+__all__ = [
+    'PlanetKey',
+    'build_request',
+    'get_items',
+    'get_thresholds',
+    'get_confidence_color'
+]
 
 class PlanetKey:
     
@@ -33,22 +41,6 @@ class PlanetKey:
         if subs: active = [True for sub in subs if sub['state'] == 'active']
         
         return any(active)
-    
-def validate_api_event(self, widget, change, data, alert):
-
-    api_key = self.w_api_key.v_model
-
-    planet_key = PlanetKey(api_key)
-    self.client = planet_key.client()
-
-    self.valid_api = planet_key.is_active()
-
-    if self.valid_api:
-        self.w_api_alert.add_msg(cm.ui.success_api.msg, cm.ui.success_api.type)
-        self._toggle_planet_setts(on=True)
-    else:
-        self.w_api_alert.add_msg(cm.ui.fail_api.msg, cm.ui.fail_api.type)
-        self._toggle_planet_setts(on=False)
 
 def build_request(aoi_geom, start_date, stop_date, cloud_cover=100):
     """build a data api search request for PS imagery.
@@ -98,7 +90,7 @@ def get_items(id_name, request, client):
 def get_thresholds(lower):
     """Get the upper limit based on the lower value"""
 
-    thres = sorted(CONFIDENCE['disc'].keys(), reverse=True)
+    thres = sorted(param.CONFIDENCE['disc'].keys(), reverse=True)
     upper = 100 if thres.index(lower)==0 else thres[thres.index(lower)-1]
 
     return (upper, lower)
@@ -118,11 +110,11 @@ def get_confidence_color(satsource, value):
     type_ = 'disc' if satsource=='modis' else 'cat'
 
     # Get category name and color into a dictionary
-    confidence_color = {k:v[1] for k, v in CONFIDENCE[type_].items()}
+    confidence_color = {k:v[1] for k, v in param.CONFIDENCE[type_].items()}
 
     if type_ == 'disc':
 
-        thresholds = sorted(CONFIDENCE['disc'].keys(), reverse=True)
+        thresholds = sorted(param.CONFIDENCE['disc'].keys(), reverse=True)
 
         for threshold in thresholds:
             if int(value) >= threshold:

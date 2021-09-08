@@ -10,10 +10,11 @@ import sepal_ui.sepalwidgets as sw
 from sepal_ui.scripts import utils as su
 
 from component.message import cm
-from component.scripts.scripts import *
-from component.widget import *
-from component.parameter import *
+from component.scripts.scripts import get_thresholds
+import component.widget as cw
+import component.parameter as param
 
+__all__=['AlertsView']
 
 class AlertsView(v.Card):
     
@@ -46,30 +47,30 @@ class AlertsView(v.Card):
         self.dwbar_output = Output()
 
         # Satellite
-        self.w_satellite = Select(
+        self.w_satellite = cw.Select(
             label=cm.alerts.wlabel.satellite,
             v_model='viirs'
         )
         self.get_sat_sources()
         
         # Recent alerts
-        self.w_recent = Select(
+        self.w_recent = cw.Select(
             label=cm.alerts.wlabel.in_the_last,
             items=[
-                {'text':text, 'value':value} for value, text in TIME_SPAN.items()
+                {'text':text, 'value':value} for value, text in param.TIME_SPAN.items()
             ],
             v_model=self.model.timespan,
         )
         
         # Historic Alerts
-        self.w_start = DatePicker(
+        self.w_start = cw.DatePicker(
             label=cm.alerts.wlabel.start,
             min="2000-01-01",
             max=self.get_max_date(),
             v_model=self.model.start_date
         )
         
-        self.w_end = DatePicker(
+        self.w_end = cw.DatePicker(
             class_='ml-5',
             label=cm.alerts.wlabel.end, 
             min="2000-01-01",
@@ -77,7 +78,7 @@ class AlertsView(v.Card):
             v_model=self.model.end_date
         )
         
-        self.w_historic = Flex(
+        self.w_historic = cw.Flex(
             class_='d-flex',
             children=[self.w_start, self.w_end]
         ).hide()
@@ -136,7 +137,7 @@ class AlertsView(v.Card):
         folder, name = self.model.write_alerts()
         
         self.alert.add_msg(
-            msg=cm.alerts.exported.format(ALERTS_DIR/folder, name),type_='success'
+            msg=cm.alerts.exported.format(param.ALERTS_DIR/folder, name),type_='success'
         )
         
         
@@ -149,7 +150,7 @@ class AlertsView(v.Card):
             self.w_satellite.items = [
                 {'text':v[0], 'value':k} 
                 for k, v
-                in SATSOURCE.items()
+                in param.SATSOURCE.items()
             ]
         else:
             # For historic periods only download the MODIS alerts
@@ -159,7 +160,7 @@ class AlertsView(v.Card):
             self.w_satellite.items = [
                 {'text':v[0], 'value':k} 
                 for k, v
-                in SATSOURCE.items()
+                in param.SATSOURCE.items()
                 if k not in ['viirs', 'viirsnoa']
             ]
             
@@ -224,7 +225,7 @@ class AlertsView(v.Card):
         # If there are more alerts thatn the threhsold, avoid display them
         # into the map
             
-        if len(self.model.aoi_alerts) <= MAX_ALERTS:
+        if len(self.model.aoi_alerts) <= param.MAX_ALERTS:
             
             # Update map dropdown alerts
             self.map_.w_alerts.items = list(self.model.aoi_alerts.index)
@@ -259,7 +260,7 @@ class AlertsView(v.Card):
         
         else:
             warnings.warn(
-                cm.alerts.overloaded.format(len(self.model.aoi_alerts), MAX_ALERTS)
+                cm.alerts.overloaded.format(len(self.model.aoi_alerts), param.MAX_ALERTS)
             )
         
         self.download_btn.disabled=False
@@ -304,7 +305,7 @@ class AlertsView(v.Card):
         headers, values = list(zip(*[
             (col_name,
             self.model.aoi_alerts.loc[alert_id, col_name]) 
-            for col_name in METADATA_ROWS
+            for col_name in param.METADATA_ROWS
         ]))
 
         values=[
