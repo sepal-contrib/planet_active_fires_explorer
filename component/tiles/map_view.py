@@ -8,10 +8,10 @@ from sepal_ui.frontend.styles import sepal_darker
 from component.message import cm
 import component.widget as cw
 
-__all__ = ['AlertMap']
+__all__ = ["AlertMap"]
+
 
 class AlertMap(m.SepalMap):
-    
     def __init__(self, model, *args, **kwargs):
 
         self.model = model
@@ -19,7 +19,9 @@ class AlertMap(m.SepalMap):
         self.lat = None
         self.lon = None
 
-        super().__init__(gee=False, basemaps=["Google Satellite"], dc=True, *args, **kwargs)
+        super().__init__(
+            gee=False, basemaps=["Google Satellite"], dc=True, *args, **kwargs
+        )
 
         self.show_dc()
         self.add_control(FullScreenControl())
@@ -41,7 +43,7 @@ class AlertMap(m.SepalMap):
                 width="30px", height="30px", line_height="30px", padding="0px"
             ),
         )
-        
+
         self.navigate_btn = Button(
             tooltip="Navigate through Alerts",
             icon="fire",
@@ -49,7 +51,7 @@ class AlertMap(m.SepalMap):
                 width="30px", height="30px", line_height="30px", padding="0px"
             ),
         )
-        
+
         self.metadata_btn = Button(
             tooltip="Fire alert metadata",
             icon="info",
@@ -57,11 +59,11 @@ class AlertMap(m.SepalMap):
                 width="30px", height="30px", line_height="30px", padding="0px"
             ),
         )
-        
+
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = sepal_darker
-        
+
         self.metadata_table = cw.MetadataTable()
 
         # Add widget as control to the map
@@ -72,29 +74,29 @@ class AlertMap(m.SepalMap):
         self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
         self.add_widget_as_control(self.metadata_btn, "topleft")
         self.add_widget_as_control(self.metadata_table, "bottomleft")
-        
+
         # Map interactions
         self.dc.on_draw(self.handle_draw)
         self.on_interaction(self._return_coordinates)
-        
+
         # show/hide elements
         self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
         self.metadata_btn.on_click(lambda *args: self.metadata_table.toggle_viz())
-        
-        self.model.observe(self.reset, 'reset')
-        
-        self.metadata_table.observe(self.model.metadata_change, 'validate')
-        self.metadata_table.observe(self.model.metadata_change, 'observ')
-        
+
+        self.model.observe(self.reset, "reset")
+
+        self.metadata_table.observe(self.model.metadata_change, "validate")
+        self.metadata_table.observe(self.model.metadata_change, "observ")
+
     def reset(self, change):
         """Remove all alerts from the map view"""
 
-        if change['new'] is True:
+        if change["new"] is True:
             # Remove previous alert layers
-            self.remove_layers_if('name', equals_to='Alerts')
+            self.remove_layers_if("name", equals_to="Alerts")
             self.w_alerts.reset()
             self.metadata_table.reset()
-            
+
     def add_widget_as_control(self, widget, position, first=False):
         """Add widget as control in the given position
 
@@ -151,13 +153,13 @@ class AlertMap(m.SepalMap):
         else:
             for layer in self.layers:
                 if hasattr(layer, prop):
-                    if layer.__dict__['_trait_values'][prop] == equals_to:
+                    if layer.__dict__["_trait_values"][prop] == equals_to:
                         self.remove_layer(layer)
 
     def _return_coordinates(self, **kwargs):
-        
+
         # Only active when method different to draw and there is a valid key
-        if all ([self.model.aoi_method != 'draw', self.model.valid_api]):
+        if all([self.model.aoi_method != "draw", self.model.valid_api]):
 
             if kwargs.get("type") == "click":
 

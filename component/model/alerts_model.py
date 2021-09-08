@@ -25,7 +25,7 @@ class AlertModel(model.Model):
 
     # If changed, propagate the status to all the tiles that are listening.
     reset = Bool(False).tag(sync=True)
-    
+
     # Input parameters
     timespan = Unicode("24h").tag(sync=True)
 
@@ -42,7 +42,7 @@ class AlertModel(model.Model):
     country = Unicode("").tag(sync=True)
 
     # Alerts type parameters
-    satsource = Unicode('viirs').tag(sync=True)
+    satsource = Unicode("viirs").tag(sync=True)
     alerts_type = Unicode("recent").tag(sync=True)
     start_date = Unicode("2020-01-01").tag(sync=True)
     end_date = Unicode("2020-02-01").tag(sync=True)
@@ -62,70 +62,69 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
-        
+
     def metadata_change(self, change):
         """Edit 'validate' and 'confidence' columns in the current aoi geodataframe.
         This event is trigged when metadata_table input values change
-        
+
         """
-        self.aoi_alerts.loc[self.current_alert, change['name']] = change['new']
-    
-    @observe('reset')    
+        self.aoi_alerts.loc[self.current_alert, change["name"]] = change["new"]
+
+    @observe("reset")
     def reset_alerts(self, change):
         """Remove previous downloaded alerts"""
 
-        if change['new'] is True:
+        if change["new"] is True:
             self.alerts = None
             self.aoi_alerts = None
             self.current_alert = None
-        
+
     def get_alerts_name(self):
         """Create an output name for the aoi alerts"""
-        
-        now = datetime.now(tz=pytz.timezone('UTC'))
-        now = now.strftime('%b%d')+random_string()
-        
-        method = f'custom_draw' if not self.country else self.country
-        
-        if self.alerts_type == 'recent':
-            acq_date = f'last{self.timespan}' 
+
+        now = datetime.now(tz=pytz.timezone("UTC"))
+        now = now.strftime("%b%d") + random_string()
+
+        method = f"custom_draw" if not self.country else self.country
+
+        if self.alerts_type == "recent":
+            acq_date = f"last{self.timespan}"
         else:
-            acq_date = f'from{self.start_date}_to{self.start_date}'
-            
-        return f'{now}_{self.satsource}_{method}_{acq_date}'
-    
+            acq_date = f"from{self.start_date}_to{self.start_date}"
+
+        return f"{now}_{self.satsource}_{method}_{acq_date}"
+
     def write_alerts(self):
-        """Write clipped alerts in a new ESRI shapefile on the module results 
+        """Write clipped alerts in a new ESRI shapefile on the module results
         directory"""
-        
+
         name = self.get_alerts_name()
-        
+
         # Save shapefile files in a folder with the same name
-        folder = param.ALERTS_DIR/name
+        folder = param.ALERTS_DIR / name
         folder.mkdir(exist_ok=True, parents=True)
-        
-        output = param.ALERTS_DIR/folder/f'{name}.shp'
-        
+
+        output = param.ALERTS_DIR / folder / f"{name}.shp"
+
         # It will overwrite any previous created file.
         self.aoi_alerts.to_file(output)
-        
+
         return folder, name
-    
+
     def download_alerts(self):
-        """Download the corresponding alerts based on the selected alert type
-        """
-        
+        """Download the corresponding alerts based on the selected alert type"""
+
         if self.alerts_type == "recent":
             # Donwload recent alerts
             df = pd.read_csv(self.get_url())
-            
+
         else:
             # Download historical alerts
             start = datetime.strptime(self.start_date, "%Y-%m-%d")
             end = datetime.strptime(self.end_date, "%Y-%m-%d")
-            
+
             # Get the corresponding sat name to concatenate the historic url
-            sat = 'modis' if self.satsource == 'modis' else 'viirs-snpp'
+            sat = "modis" if self.satsource == "modis" else "viirs-snpp"
 
             # Validate y2 >= y1
             if end < start:
@@ -139,20 +138,20 @@ class AlertModel(model.Model):
 
                 # Verify if the files is not previously downloaded
                 out_file = param.HISTORIC_DIR / f"historic_{sat}_fires_{y}.zip"
-                
+
                 if not out_file.exists():
-                    
-                    url = param.HISTORIC_URL.format(sat,y)
-                    response = getattr(urllib, 'request', urllib).urlopen(url)
+
+                    url = param.HISTORIC_URL.format(sat, y)
+                    response = getattr(urllib, "request", urllib).urlopen(url)
                     with tqdm(
-                        unit='B', 
-                        unit_scale=True, 
-                        unit_divisor=1024, 
+                        unit="B",
+                        unit_scale=True,
+                        unit_divisor=1024,
                         miniters=1,
-                        desc='downloading...',
+                        desc="downloading...",
                         bar_format=param.BAR_FORMAT,
-                        dynamic_ncols =True,
-                        total=getattr(response, 'length')
+                        dynamic_ncols=True,
+                        total=getattr(response, "length"),
                     ) as f:
 
                         def callback(b, bsize, tsize):
@@ -161,7 +160,7 @@ class AlertModel(model.Model):
                         urllib.request.urlretrieve(url, out_file, callback)
 
                         f.total = f.n
-                        
+
                 # Open all fires into the zipped files and merge
                 # thme into one single DataFrame
 
@@ -171,8 +170,8 @@ class AlertModel(model.Model):
                         pd.read_csv(zip_file.open(text_file.filename))
                         for text_file in tqdm(
                             zip_file.infolist(),
-                            desc='unzipping...',
-                            dynamic_ncols =True,
+                            desc="unzipping...",
+                            dynamic_ncols=True,
                             bar_format=param.BAR_FORMAT,
                         )
                         if text_file.filename.endswith(".csv")
@@ -188,7 +187,7 @@ class AlertModel(model.Model):
 
             # Cast again as string
             df["acq_date"] = df["acq_date"].astype(str)
-            
+
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
@@ -213,27 +212,25 @@ class AlertModel(model.Model):
             .iloc[0]
             .geometry
         )
-        
-        self.aoi_alerts = alerts[
-            alerts.geometry.intersects(clip_geometry)
-        ].copy()
-        
+
+        self.aoi_alerts = alerts[alerts.geometry.intersects(clip_geometry)].copy()
+
     def format_gdf(self):
         """Reformat alerts aoi geodataframe to fit with the outputs needs.
-        We are doing this here because we don't want to format needlessly the 
+        We are doing this here because we don't want to format needlessly the
         whole geodataframe.
         """
-        
+
         # Create two new columns for user's inputs
-        self.aoi_alerts['validate'] = 'not'
-        self.aoi_alerts['observ']  = ''
-        
+        self.aoi_alerts["validate"] = "not"
+        self.aoi_alerts["observ"] = ""
+
         def parse(time):
             """Parse int time into string formated time"""
             time = str(time)
-            return f'{time[:-2]}:{time[-2:]}'
+            return f"{time[:-2]}:{time[-2:]}"
 
-        self.aoi_alerts['acq_time'] = self.aoi_alerts.acq_time.apply(parse)
+        self.aoi_alerts["acq_time"] = self.aoi_alerts.acq_time.apply(parse)
 
     def alerts_to_squares(self):
         """Convert the point alerts into square polygons to display on map"""
@@ -241,44 +238,43 @@ class AlertModel(model.Model):
         # Convert alert's geometries to 54009 (projected crs)
         # and use 375m as buffer
         geometry_col = (
-            self.aoi_alerts.to_crs('ESRI:54009')['geometry']
+            self.aoi_alerts.to_crs("ESRI:54009")["geometry"]
             .buffer(187.5, cap_style=3)
             .copy()
         )
 
         square_alerts = self.aoi_alerts.assign(geometry=geometry_col)
-        
+
         # Divide alerts into confidence categories
-        
+
         def get_color(feature):
-            confidence = feature['properties']['confidence']
+            confidence = feature["properties"]["confidence"]
             color = cs.get_confidence_color(self.satsource, confidence)
             return {
-                'color': color,
-                'fillColor': color,
-            } 
-        
-        json_aoi_alerts = json.loads(square_alerts.to_crs('EPSG:4326').to_json())
+                "color": color,
+                "fillColor": color,
+            }
+
+        json_aoi_alerts = json.loads(square_alerts.to_crs("EPSG:4326").to_json())
 
         return GeoJSON(
             data=json_aoi_alerts,
-            name='Alerts',
-            style={'fillOpacity': 0.1, 'weight': 2},
-            hover_style={'color': 'white', 'dashArray': '0', 'fillOpacity': 0.5},
-            style_callback=get_color
+            name="Alerts",
+            style={"fillOpacity": 0.1, "weight": 2},
+            hover_style={"color": "white", "dashArray": "0", "fillOpacity": 0.5},
+            style_callback=get_color,
         )
-    
 
     def get_confidence_items(self):
         """Get the corresponding confidence items based on the satellite selection"""
-        
+
         # Modis satellite is using a discrete range of values ranging from 0-100
         # We have divided its values in three categories (view app.py)
-        
-        type_ = 'disc' if self.satsource=='modis' else 'cat'
-                    
+
+        type_ = "disc" if self.satsource == "modis" else "cat"
+
         confidence_by_sat = [
-            {'text':v[0], 'value':k} for k,v in param.CONFIDENCE[type_].items()
+            {"text": v[0], "value": k} for k, v in param.CONFIDENCE[type_].items()
         ]
-                
-        return ['All'] + confidence_by_sat
+
+        return ["All"] + confidence_by_sat
