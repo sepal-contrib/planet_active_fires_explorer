@@ -42,6 +42,6 @@ METADATA_ROWS = {
     "acq_date": cm.alerts.metadata.acq_date,
     "acq_time": cm.alerts.metadata.acq_time,
     "confidence": cm.alerts.metadata.confidence,
-    "validate": cm.alerts.metadata.validate,
+    "reviewed": cm.alerts.metadata.reviewed,
     "observ": cm.alerts.metadata.observation,
 }

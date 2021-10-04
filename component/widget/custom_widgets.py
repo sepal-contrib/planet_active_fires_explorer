@@ -248,7 +248,7 @@ class Tabs(v.Card):
 class MetadataTable(v.Card, SepalWidget):
     """Widget to get a simple table displaying the metadata of the alerts"""
 
-    validate = Unicode("").tag(sync=True)
+    reviewed = Unicode("").tag(sync=True)
     observ = Unicode("").tag(sync=True)
 
     def __init__(self, *args, **kwargs):
@@ -268,11 +268,11 @@ class MetadataTable(v.Card, SepalWidget):
                 {"text": cm.alerts.metadata.items.no, "value": "not"},
             ],
             dense=True,
-            v_model=self.validate,
+            v_model=self.reviewed,
         )
         self.w_observ = v.Textarea(dense=True, rows=2, v_model=self.observ)
 
-        link((self, "validate"), (self.w_validate, "v_model"))
+        link((self, "reviewed"), (self.w_validate, "v_model"))
         link((self, "observ"), (self.w_observ, "v_model"))
 
     def update(self, satsource, data):
@@ -292,7 +292,7 @@ class MetadataTable(v.Card, SepalWidget):
                     children=[value],
                 )
 
-            elif header == "validate":
+            elif header == "reviewed":
                 self.w_validate.v_model = value
                 value = self.w_validate
 

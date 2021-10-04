@@ -222,7 +222,7 @@ class AlertModel(model.Model):
         """
 
         # Create two new columns for user's inputs
-        self.aoi_alerts["validate"] = "not"
+        self.aoi_alerts["reviewed"] = ""
         self.aoi_alerts["observ"] = ""
 
         def parse(time):

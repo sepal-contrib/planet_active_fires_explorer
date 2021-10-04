@@ -44,7 +44,7 @@
             "acq_date" : "Acq. date",
             "acq_time" : "Acq. time",
             "confidence" : "Confidence",
-            "validate" : "Validate",
+            "reviewed" : "Reviewed",
             "observation" : "Observation",
             "items": {
                 "yes":"Yes",
