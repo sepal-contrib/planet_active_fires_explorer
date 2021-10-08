@@ -1,4 +1,3 @@
-======
 SEPAFE
 ======
 
@@ -11,7 +10,7 @@ SEPAFE aims to provide users with a quick way to get and validate fire alerts fr
 
 
 Settings panel
--------------
+--------------
 
 The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Area of Interest` and :code:`Alerts`, each of them is a necessary step to get the fire alerts.
 
