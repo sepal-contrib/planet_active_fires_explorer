@@ -18,10 +18,13 @@ class AlertMap(m.SepalMap):
 
         self.lat = None
         self.lon = None
+        
+        kwargs["dc"] = True
+        kwargs["gee"] = False
+        kwargs["basemaps"] = ["Google Satellite"]
+        kwargs["statebar"] = True
 
-        super().__init__(
-            gee=False, basemaps=["Google Satellite"], dc=True, *args, **kwargs
-        )
+        super().__init__(*args, **kwargs)
 
         self.show_dc()
         self.add_control(FullScreenControl())
