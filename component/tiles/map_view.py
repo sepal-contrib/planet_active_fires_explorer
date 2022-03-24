@@ -27,7 +27,7 @@ class AlertMap(m.SepalMap):
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(FullScreenControl())
+        self.add_control(m.FullScreenControl(position="topleft"))
 
         # Create widgets
 

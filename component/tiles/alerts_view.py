@@ -56,19 +56,19 @@ class AlertsView(v.Card):
         )
 
         # Historic Alerts
-        self.w_start = cw.DatePicker(
+        self.w_start = sw.DatePicker(
             label=cm.alerts.wlabel.start,
             min="2000-01-01",
             max=self.get_max_date(),
-            v_model=self.model.start_date,
+            v_model="",
         )
 
-        self.w_end = cw.DatePicker(
+        self.w_end = sw.DatePicker(
             class_="ml-5",
             label=cm.alerts.wlabel.end,
             min="2000-01-01",
             max=self.get_max_date(),
-            v_model=self.model.end_date,
+            v_model="",
         )
 
         self.w_historic = cw.Flex(
