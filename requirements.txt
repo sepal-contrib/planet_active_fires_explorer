@@ -14,7 +14,7 @@ git+https://github.com/openforis/earthengine-api.git@v0.1.270#egg=earthengine-ap
 
 # the base lib to run any sepal_ui based app 
 # don't forget to fix it to a specific version when you're app is ready
-git+https://github.com/12rambau/sepal_ui.git@072b5fed4c5ce6a03ed598c58abe44b437afb732
+sepal_ui==2.7.0
 
 # custom libs
 ipywidgets==7.6.5
