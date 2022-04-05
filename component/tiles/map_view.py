@@ -3,7 +3,7 @@ from ipyleaflet import WidgetControl, FullScreenControl, Marker
 
 from sepal_ui import mapping as m
 from sepal_ui import sepalwidgets as sw
-from sepal_ui.frontend.styles import sepal_darker
+from sepal_ui import color
 
 from component.message import cm
 import component.widget as cw
@@ -65,7 +65,7 @@ class AlertMap(m.SepalMap):
 
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
         self.w_state_bar = sw.StateBar(loading=False)
-        self.w_state_bar.color = sepal_darker
+        self.w_state_bar.color = color.darker
 
         self.metadata_table = cw.MetadataTable()
 
