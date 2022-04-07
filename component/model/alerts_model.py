@@ -129,6 +129,7 @@ class AlertModel(model.Model):
             # Validate y2 >= y1
             if end < start:
                 raise Exception("End date must be older than starting")
+            
             # Get unique year(s)
             years = list(range(start.year, end.year + 1))
 
@@ -178,20 +179,25 @@ class AlertModel(model.Model):
                     ]
                 )
                 all_dfs.append(dfs)
+                
             dfs = pd.concat(all_dfs)
 
             # Filter them with its date
             dfs.acq_date = pd.to_datetime(dfs.acq_date)
 
-            df = gpd.GeoDataFrame(dfs[(dfs.acq_date >= start) & (dfs.acq_date <= end)])
+            df = gpd.GeoDataFrame(
+                dfs[(dfs.acq_date >= start) & (dfs.acq_date <= end)]
+            ).reset_index(drop=True)
 
             # Cast again as string
             df["acq_date"] = df["acq_date"].astype(str)
-
+            
+        
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
 
+                
     def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
@@ -200,7 +206,7 @@ class AlertModel(model.Model):
         return param.RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
-        """Clip recent or historical geodataframe with area of interest and save it"""
+        """Clip recent or historical geodataframe with area of interest and save it."""
 
         if not self.aoi_geometry:
             raise Exception(cm.ui.valid_aoi)
