@@ -91,7 +91,6 @@ class AoiView(v.Card):
             aoi = GeoJSON(
                 data=data,
                 name=change["new"],
-                style={"color": "green", "fillOpacity": 0, "weight": 3},
             )
 
             bounds = geometry.bounds
