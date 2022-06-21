@@ -327,5 +327,5 @@ class AlertsView(v.Card):
             self._get_metadata(self.model.current_alert)
 
             # Search and add layers to map
-            if self.model.valid_api:
+            if self.model.planet_model.active:
                 self.planet.add_planet_imagery()

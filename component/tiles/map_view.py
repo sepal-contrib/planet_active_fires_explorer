@@ -1,5 +1,5 @@
 from ipywidgets import Button, Layout, Output
-from ipyleaflet import WidgetControl, FullScreenControl, Marker
+from ipyleaflet import WidgetControl, Marker
 
 from sepal_ui import mapping as m
 from sepal_ui import sepalwidgets as sw
@@ -12,6 +12,7 @@ __all__ = ["AlertMap"]
 
 
 class AlertMap(m.SepalMap):
+    
     def __init__(self, model, *args, **kwargs):
 
         self.model = model
@@ -21,13 +22,13 @@ class AlertMap(m.SepalMap):
         
         kwargs["dc"] = True
         kwargs["gee"] = False
-        kwargs["basemaps"] = ["Google Satellite"]
+        kwargs["basemaps"] = ["SATELLITE"]
         kwargs["statebar"] = True
 
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(m.FullScreenControl(position="topleft"))
+        self.add_control(m.FullScreenControl(self, position="topleft"))
 
         # Create widgets
 
@@ -122,18 +123,10 @@ class AlertMap(m.SepalMap):
 
             self.controls = self.controls + tuple([new_control])
 
-    def remove_layers(self):
-        """Remove all layers in map. Except the basemap"""
-        # get map layers
-        layers = self.layers
-
-        # loop and remove layers
-        [self.remove_last_layer() for _ in range(len(layers))]
-
     def handle_draw(self, target, action, geo_json):
         """Store geometry geometry in the model"""
 
-        self.remove_layers()
+        self.remove_all()
         if action == "created":
             self.model.aoi_geometry = {"type": "FeatureCollection", "features": []}
 
@@ -162,7 +155,7 @@ class AlertMap(m.SepalMap):
     def _return_coordinates(self, **kwargs):
 
         # Only active when method different to draw and there is a valid key
-        if all([self.model.aoi_method != "draw", self.model.valid_api]):
+        if all([self.model.aoi_method != "draw", self.model.planet_model.active]):
 
             if kwargs.get("type") == "click":
 

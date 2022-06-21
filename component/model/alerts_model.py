@@ -14,6 +14,7 @@ from shapely.geometry import Polygon
 from traitlets import Any, Bool, Unicode, Int, observe
 from ipyleaflet import GeoJSON
 
+from sepal_ui.planetapi import PlanetModel
 from sepal_ui.scripts.utils import random_string
 from sepal_ui import model
 
@@ -35,7 +36,6 @@ class AlertModel(model.Model):
     days_before = Int(1).tag(sync=True)
     days_after = Int(1).tag(sync=True)
     max_images = Int(6).tag(sync=True)
-    api_key = Unicode("").tag(sync=True)
 
     # Aoi parameters
     aoi_method = Unicode("").tag(sync=True)
@@ -55,10 +55,8 @@ class AlertModel(model.Model):
         self.alerts = None
         self.aoi_alerts = None
         self.current_alert = None
-
-        # Planet
-        self.client = None
-        self.valid_api = False
+        
+        self.planet_model = PlanetModel()
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
