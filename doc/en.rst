@@ -14,7 +14,7 @@ Settings panel
 
 The settings panel is composed of three tabs: :code:`Planet Imagery`, :code:`Area of Interest` and :code:`Alerts`, each of them is a necessary step to get the fire alerts.
 
-.. tip:: The settings panel can be open/closed by clicking on the settings :btn:`fas fa-bars` button.
+.. tip:: The settings panel can be open/closed by clicking on the settings :btn:`<fas fa-bars>` button.
 
 Connect your Planet API Key
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -67,13 +67,13 @@ Once the alerts are being displayed on the map, you will be able to navigate thr
 
 .. image:: https://raw.githubusercontent.com/dfguerrerom/planet_active_fires_explorer/main/doc/gif/alerts_navigation.gif
 
-.. tip:: You can activate/deactivate the firee navigation widget by clicking over the fires :btn:`fas fa-fire` button.
+.. tip:: You can activate/deactivate the firee navigation widget by clicking over the fires :btn:`<fas fa-fire>` button.
 
-.. tip:: Planet parameters can be changed at any time, to refresh the results from the current alert click over the refresh :btn:`fas fa-sync-alt` icon. 
+.. tip:: Planet parameters can be changed at any time, to refresh the results from the current alert click over the refresh :btn:`<fas fa-sync-alt>` icon. 
 
 Manually load planet imagery
 ----------------------------
 
-Click over any point in the map and use the refresh icon :btn:`fas fa-sync-alt` to retrieve planet imagery using the parameters set in the step 1, the module will use the current acquisition alert date to search the images. This option is useful when you want to explore surrounding areas close to the alert point but without alerts to display.
+Click over any point in the map and use the refresh icon :btn:`<fas fa-sync-alt>` to retrieve planet imagery using the parameters set in the step 1, the module will use the current acquisition alert date to search the images. This option is useful when you want to explore surrounding areas close to the alert point but without alerts to display.
 
 .. warning:: For use this option you will require a valid planet level 2 key, otherwise you will get an error message displayed in the state bar.
