@@ -242,7 +242,7 @@ class PlanetView(v.Card, sw.SepalWidget):
 
         return items_df
 
-    def add_planet_imagery(self, event=None):
+    def add_planet_imagery(self, *args):
         """Search planet imagery and add them to self
 
         Args:
