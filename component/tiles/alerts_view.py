@@ -3,6 +3,7 @@ import datetime
 import warnings
 from numpy import float64
 
+from ipyleaflet import GeoJSON
 from ipywidgets import Output
 import ipyvuetify as v
 
@@ -185,9 +186,13 @@ class AlertsView(v.Card):
         self.model.reset = True
 
         self.download_btn.disabled = True
-
+        
         if not self.model.aoi_geometry:
             raise Exception(cm.ui.valid_aoi)
+            
+        if self.model.aoi_method == "draw":
+            self.map_.dc.clear()
+            self.map_.add_layer(GeoJSON(data=self.model.aoi_geometry))
 
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_="info")
 
@@ -327,5 +332,5 @@ class AlertsView(v.Card):
             self._get_metadata(self.model.current_alert)
 
             # Search and add layers to map
-            if self.model.valid_api:
+            if self.model.planet_model.active:
                 self.planet.add_planet_imagery()

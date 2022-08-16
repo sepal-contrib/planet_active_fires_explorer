@@ -14,6 +14,7 @@ from shapely.geometry import Polygon
 from traitlets import Any, Bool, Unicode, Int, observe
 from ipyleaflet import GeoJSON
 
+from sepal_ui.planetapi import PlanetModel
 from sepal_ui.scripts.utils import random_string
 from sepal_ui import model
 
@@ -35,7 +36,6 @@ class AlertModel(model.Model):
     days_before = Int(1).tag(sync=True)
     days_after = Int(1).tag(sync=True)
     max_images = Int(6).tag(sync=True)
-    api_key = Unicode("").tag(sync=True)
 
     # Aoi parameters
     aoi_method = Unicode("").tag(sync=True)
@@ -55,10 +55,8 @@ class AlertModel(model.Model):
         self.alerts = None
         self.aoi_alerts = None
         self.current_alert = None
-
-        # Planet
-        self.client = None
-        self.valid_api = False
+        
+        self.planet_model = PlanetModel()
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
@@ -129,6 +127,7 @@ class AlertModel(model.Model):
             # Validate y2 >= y1
             if end < start:
                 raise Exception("End date must be older than starting")
+            
             # Get unique year(s)
             years = list(range(start.year, end.year + 1))
 
@@ -178,20 +177,25 @@ class AlertModel(model.Model):
                     ]
                 )
                 all_dfs.append(dfs)
+                
             dfs = pd.concat(all_dfs)
 
             # Filter them with its date
             dfs.acq_date = pd.to_datetime(dfs.acq_date)
 
-            df = gpd.GeoDataFrame(dfs[(dfs.acq_date >= start) & (dfs.acq_date <= end)])
+            df = gpd.GeoDataFrame(
+                dfs[(dfs.acq_date >= start) & (dfs.acq_date <= end)]
+            ).reset_index(drop=True)
 
             # Cast again as string
             df["acq_date"] = df["acq_date"].astype(str)
-
+            
+        
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
 
+                
     def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
@@ -200,7 +204,7 @@ class AlertModel(model.Model):
         return param.RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
-        """Clip recent or historical geodataframe with area of interest and save it"""
+        """Clip recent or historical geodataframe with area of interest and save it."""
 
         if not self.aoi_geometry:
             raise Exception(cm.ui.valid_aoi)

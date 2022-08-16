@@ -28,8 +28,6 @@ class AoiView(v.Card):
         # We are not using the sepal_ui AOI tile because its high impact
         # On the performance when clipping the alerts, we should
         # find a better approach to clip the alerts
-        # self.view = AoiView(methods=['-POINTS'], gee=False)
-        # self.view.elevation = 0
 
         self.model = model
 
@@ -61,21 +59,21 @@ class AoiView(v.Card):
     def aoi_method_event(self, change):
         """Toggle components"""
 
-        self.map_.remove_layers()
+        self.map_.remove_all()
 
         if change["new"] == "country":
-            self.map_.hide_dc()
+            self.map_.dc.hide()
             su.show_component(self.w_countries)
 
         else:
             su.hide_component(self.w_countries)
             self.w_countries.v_model = ""
-            self.map_.show_dc()
+            self.map_.dc.show()
 
     def add_country_event(self, change):
         """Add the selected country in the map"""
 
-        self.map_.remove_layers()
+        self.map_.remove_all()
 
         if change["new"]:
 
@@ -91,7 +89,6 @@ class AoiView(v.Card):
             aoi = GeoJSON(
                 data=data,
                 name=change["new"],
-                style={"color": "green", "fillOpacity": 0, "weight": 3},
             )
 
             bounds = geometry.bounds
