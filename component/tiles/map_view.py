@@ -23,48 +23,22 @@ class AlertMap(m.SepalMap):
         kwargs["dc"] = True
         kwargs["gee"] = False
         kwargs["basemaps"] = ["SATELLITE"]
-        kwargs["statebar"] = True
+        kwargs["statebar"] = False
 
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(m.FullScreenControl(self, position="topleft"))
-
-        # Create widgets
-
-        self.reload_btn = Button(
-            disabled=False,
-            tooltip="Reload Planet imagery",
-            icon="refresh",
-            layout=Layout(
-                width="30px", height="30px", line_height="30px", padding="0px"
-            ),
+        self.add_control(
+            m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
         )
-        self.parameters_btn = Button(
-            tooltip="Toggle parameters",
-            icon="navicon",
-            layout=Layout(
-                width="30px", height="30px", line_height="30px", padding="0px"
-            ),
-        )
-
-        self.navigate_btn = Button(
-            tooltip="Navigate through Alerts",
-            icon="fire",
-            layout=Layout(
-                width="30px", height="30px", line_height="30px", padding="0px"
-            ),
-        )
-
-        self.metadata_btn = Button(
-            tooltip="Fire alert metadata",
-            icon="info",
-            layout=Layout(
-                width="30px", height="30px", line_height="30px", padding="0px"
-            ),
-        )
-
+        
+        self.reload_btn = m.MapBtn("fas fa-sync-alt")
+        self.parameters_btn = m.MapBtn("fas fa-bars")
+        self.navigate_btn = m.MapBtn("fas fa-fire")
+        self.metadata_btn = m.MapBtn("fas fa-info-circle")
+        
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
+        
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = color.darker
 
@@ -84,8 +58,8 @@ class AlertMap(m.SepalMap):
         self.on_interaction(self._return_coordinates)
 
         # show/hide elements
-        self.navigate_btn.on_click(lambda *args: self.w_alerts.toggle_viz())
-        self.metadata_btn.on_click(lambda *args: self.metadata_table.toggle_viz())
+        self.navigate_btn.on_event("click", lambda *args: self.w_alerts.toggle_viz())
+        self.metadata_btn.on_event("click", lambda *args: self.metadata_table.toggle_viz())
 
         self.model.observe(self.reset, "reset")
 
@@ -129,7 +103,6 @@ class AlertMap(m.SepalMap):
         self.remove_all()
         if action == "created":
             self.model.aoi_geometry = {"type": "FeatureCollection", "features": []}
-
             self.model.aoi_geometry["features"].append(geo_json)
 
     def remove_layers_if(self, prop, equals_to, _metadata=False):
@@ -174,3 +147,31 @@ class AlertMap(m.SepalMap):
                 marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
                 self.add_layer(marker)
+                
+    def set_code(self, link):
+        "add the code link btn to the map"
+
+        btn = m.MapBtn("fas fa-code", href=link, target="_blank")
+        control = WidgetControl(widget=btn, position="bottomleft")
+        self.add_control(control)
+
+        return
+
+    def set_wiki(self, link):
+        "add the wiki link btn to the map"
+
+        btn = m.MapBtn("fas fa-book-open", href=link, target="_blank")
+        control = WidgetControl(widget=btn, position="bottomleft")
+        self.add_control(control)
+
+        return
+
+    def set_issue(self, link):
+        "add the code link btn to the map"
+
+        btn = m.MapBtn("fas fa-bug", href=link, target="_blank")
+        control = WidgetControl(widget=btn, position="bottomleft")
+        self.add_control(control)
+
+        return
+
