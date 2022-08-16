@@ -235,8 +235,8 @@ class MetadataTable(v.Card, SepalWidget):
 
         self.w_validate = v.Select(
             items=[
-                {"text": cm.alerts.metadata.items.yes, "value": "yes"},
-                {"text": cm.alerts.metadata.items.no, "value": "not"},
+                {"text": cm.alerts.metadata.items_.yes, "value": "yes"},
+                {"text": cm.alerts.metadata.items_.no, "value": "not"},
             ],
             dense=True,
             v_model=self.reviewed,

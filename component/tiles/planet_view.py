@@ -154,7 +154,7 @@ class PlanetView(v.Card, sw.SepalWidget):
         ]
 
         # Interactions with Map
-        self.map_.reload_btn.on_click(self.add_planet_imagery)
+        self.map_.reload_btn.on_event("click", self.add_planet_imagery)
 
         # ui events
         self.panels.observe(self._on_panel_change, "v_model")
