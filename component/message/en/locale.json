@@ -46,7 +46,7 @@
             "confidence" : "Confidence",
             "reviewed" : "Reviewed",
             "observation" : "Observation",
-            "items": {
+            "items_": {
                 "yes":"Yes",
                 "no":"Not"
             }
