@@ -1,10 +1,10 @@
 import ipyvuetify as v
-from traitlets import Unicode, List, Int, Any, link
+import sepal_ui.sepalwidgets as sw
+from traitlets import Any, Int, List, Unicode, link
 
 import component.parameter as param
-from component.message import cm
 import component.scripts.scripts as cs
-import sepal_ui.sepalwidgets as sw
+from component.message import cm
 
 __all__ = [
     "DynamicSelect",

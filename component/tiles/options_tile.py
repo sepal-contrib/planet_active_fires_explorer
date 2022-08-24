@@ -2,7 +2,7 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 
 from component.model import AlertModel
-from component.tiles import PlanetView, AoiView, AlertsView
+from component.tiles import AlertsView, AoiView, PlanetView
 from component.widget import Tabs
 
 __all__ = ["PanelTile"]

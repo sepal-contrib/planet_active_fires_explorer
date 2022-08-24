@@ -1,22 +1,19 @@
 import json
-import pytz
-from datetime import datetime
 import urllib
+from datetime import datetime
 from pathlib import Path
 from zipfile import ZipFile
-from tqdm.auto import tqdm
 
-
-import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Polygon
-
-from traitlets import Any, Bool, Unicode, Int, observe
+import pandas as pd
+import pytz
 from ipyleaflet import GeoJSON
-
+from sepal_ui import model
 from sepal_ui.planetapi import PlanetModel
 from sepal_ui.scripts.utils import random_string
-from sepal_ui import model
+from shapely.geometry import Polygon
+from tqdm.auto import tqdm
+from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
 import component.scripts.scripts as cs

@@ -1,18 +1,17 @@
-import json
 import datetime
-from shapely.geometry import Point
+import json
+
+import ipyvuetify as v
 import pandas as pd
+import sepal_ui.sepalwidgets as sw
+from ipyleaflet import TileLayer
+from sepal_ui.planetapi.planet_view import PlanetView as PV
+from shapely.geometry import Point
 from shapely_geojson import dumps
 
-from ipyleaflet import TileLayer
-import ipyvuetify as v
-
-import sepal_ui.sepalwidgets as sw
-from sepal_ui.planetapi.planet_view import PlanetView as PV
-
 import component.parameter as param
-from component.model import AlertModel
 from component.message import cm
+from component.model import AlertModel
 
 __all__ = ["PlanetView"]
 

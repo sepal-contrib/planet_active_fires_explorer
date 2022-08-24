@@ -1,15 +1,13 @@
-import geopandas as gpd
 import json
 
-from ipyleaflet import GeoJSON
-
+import geopandas as gpd
 import ipyvuetify as v
-
 import sepal_ui.sepalwidgets as sw
+from ipyleaflet import GeoJSON
 from sepal_ui.scripts import utils as su
 
-from component.message import cm
 import component.parameter as param
+from component.message import cm
 
 __all__ = ["AoiView"]
 

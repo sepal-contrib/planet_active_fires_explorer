@@ -1,12 +1,11 @@
+from ipyleaflet import Marker, WidgetControl
 from ipywidgets import Button, Layout, Output
-from ipyleaflet import WidgetControl, Marker
-
+from sepal_ui import color
 from sepal_ui import mapping as m
 from sepal_ui import sepalwidgets as sw
-from sepal_ui import color
 
-from component.message import cm
 import component.widget as cw
+from component.message import cm
 
 __all__ = ["AlertMap"]
 

@@ -1,18 +1,17 @@
-import pytz
 import datetime
 import warnings
-from numpy import float64
 
+import ipyvuetify as v
+import pytz
+import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON
 from ipywidgets import Output
-import ipyvuetify as v
-
-import sepal_ui.sepalwidgets as sw
+from numpy import float64
 from sepal_ui.scripts import utils as su
 
+import component.parameter as param
 from component.message import cm
 from component.scripts.scripts import get_thresholds
-import component.parameter as param
 
 __all__ = ["AlertsView"]
 
