@@ -24,7 +24,9 @@ CHIPS = {
 }
 
 
-class CustomPanel(sw.ExpansionPanel,):
+class CustomPanel(
+    sw.ExpansionPanel,
+):
     def __init__(self, model, widgets):
 
         # link with model
@@ -138,13 +140,9 @@ class PlanetView(sw.Card):
         )
 
         # Capture parameters and bind them to the model
-        self.model.bind(
-            self.w_days_before, "days_before"
-        ).bind(self.w_days_after, "days_after").bind(
-            self.w_max_images, "max_images"
-        ).bind(
-            self.w_cloud_cover, "cloud_cover"
-        )
+        self.model.bind(self.w_days_before, "days_before").bind(
+            self.w_days_after, "days_after"
+        ).bind(self.w_max_images, "max_images").bind(self.w_cloud_cover, "cloud_cover")
 
         self.children = [
             v.CardTitle(children=[cm.planet.card_title]),
@@ -193,7 +191,10 @@ class PlanetView(sw.Card):
         end = now + datetime.timedelta(days=days_after + 1)
         cloud_cover = self.model.cloud_cover / 100
 
-        return ("Alert", self.model.planet_model.get_items(aoi, start, end, cloud_cover))
+        return (
+            "Alert",
+            self.model.planet_model.get_items(aoi, start, end, cloud_cover),
+        )
 
     def _prioritize_items(self, items):
         """Prioritize planet items"""
@@ -270,9 +271,7 @@ class PlanetView(sw.Card):
 
             for i, row in items_df.iterrows():
                 layer = TileLayer(
-                    url=param.PLANET_TILES_URL.format(
-                        row.item_type, row.id, key
-                    ),
+                    url=param.PLANET_TILES_URL.format(row.item_type, row.id, key),
                     name=f"{row.item_type}, {row.date}",
                     attribution="Imagery © Planet Labs Inc.",
                 )

@@ -11,14 +11,13 @@ __all__ = ["AlertMap"]
 
 
 class AlertMap(m.SepalMap):
-    
     def __init__(self, model, *args, **kwargs):
 
         self.model = model
 
         self.lat = None
         self.lon = None
-        
+
         kwargs["dc"] = True
         kwargs["gee"] = False
         kwargs["basemaps"] = ["SATELLITE"]
@@ -30,14 +29,14 @@ class AlertMap(m.SepalMap):
         self.add_control(
             m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
         )
-        
+
         self.reload_btn = m.MapBtn("fas fa-sync-alt")
         self.parameters_btn = m.MapBtn("fas fa-bars")
         self.navigate_btn = m.MapBtn("fas fa-fire")
         self.metadata_btn = m.MapBtn("fas fa-info-circle")
-        
+
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
-        
+
         self.w_state_bar = sw.StateBar(loading=False)
         self.w_state_bar.color = color.darker
 
@@ -58,7 +57,9 @@ class AlertMap(m.SepalMap):
 
         # show/hide elements
         self.navigate_btn.on_event("click", lambda *args: self.w_alerts.toggle_viz())
-        self.metadata_btn.on_event("click", lambda *args: self.metadata_table.toggle_viz())
+        self.metadata_btn.on_event(
+            "click", lambda *args: self.metadata_table.toggle_viz()
+        )
 
         self.model.observe(self.reset, "reset")
 
@@ -146,7 +147,7 @@ class AlertMap(m.SepalMap):
                 marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
                 self.add_layer(marker)
-                
+
     def set_code(self, link):
         "add the code link btn to the map"
 
@@ -173,4 +174,3 @@ class AlertMap(m.SepalMap):
         self.add_control(control)
 
         return
-

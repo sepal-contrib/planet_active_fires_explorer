@@ -7,6 +7,7 @@ __all__ = [
     "get_confidence_color",
 ]
 
+
 def get_thresholds(lower):
     """Get the upper limit based on the lower value"""
 

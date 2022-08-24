@@ -14,7 +14,9 @@ __all__ = [
 ]
 
 
-class DynamicSelect(sw.Card,):
+class DynamicSelect(
+    sw.Card,
+):
 
     """Widget to navigate with next and previous buttons over a list
 
@@ -96,7 +98,7 @@ class DynamicSelect(sw.Card,):
         """go to the next value. loop to the first or last one if we reach the end"""
 
         increm = widget.value
-        
+
         # get the current position in the list
         val = self.w_list.v_model
         if val in self.w_list.items:
@@ -115,8 +117,6 @@ class DynamicSelect(sw.Card,):
             pos = 0
 
         self.w_list.v_model = self.w_list.items[pos]
-
-
 
     def reset(self):
         """Restore widgets and values to default"""
@@ -186,7 +186,9 @@ class Tabs(sw.Card):
         super().__init__(**kwargs)
 
 
-class MetadataTable(sw.Card,):
+class MetadataTable(
+    sw.Card,
+):
     """Widget to get a simple table displaying the metadata of the alerts"""
 
     reviewed = Unicode("").tag(sync=True)

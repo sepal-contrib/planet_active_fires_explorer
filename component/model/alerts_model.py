@@ -52,7 +52,7 @@ class AlertModel(model.Model):
         self.alerts = None
         self.aoi_alerts = None
         self.current_alert = None
-        
+
         self.planet_model = PlanetModel()
 
         # It will store both draw and country geometry
@@ -124,7 +124,7 @@ class AlertModel(model.Model):
             # Validate y2 >= y1
             if end < start:
                 raise Exception("End date must be older than starting")
-            
+
             # Get unique year(s)
             years = list(range(start.year, end.year + 1))
 
@@ -174,7 +174,7 @@ class AlertModel(model.Model):
                     ]
                 )
                 all_dfs.append(dfs)
-                
+
             dfs = pd.concat(all_dfs)
 
             # Filter them with its date
@@ -186,13 +186,11 @@ class AlertModel(model.Model):
 
             # Cast again as string
             df["acq_date"] = df["acq_date"].astype(str)
-            
-        
+
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
 
-                
     def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
