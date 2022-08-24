@@ -10,7 +10,6 @@ from sepal_ui.scripts import utils as su
 
 from component.message import cm
 import component.parameter as param
-import component.widget as cw
 
 __all__ = ["AoiView"]
 
@@ -31,7 +30,7 @@ class AoiView(v.Card):
 
         self.model = model
 
-        self.w_aoi_method = cw.Select(
+        self.w_aoi_method = sw.Select(
             label=cm.ui.aoi_method,
             v_model="draw",
             items=[
@@ -40,7 +39,7 @@ class AoiView(v.Card):
             ],
         )
 
-        self.w_countries = cw.Select(
+        self.w_countries = sw.Select(
             label=cm.aoi.method.country,
             v_model="",
             items=COUNTRIES.name.to_list(),

@@ -1,15 +1,12 @@
 import ipyvuetify as v
 from traitlets import Unicode, List, Int, Any, link
 
-from sepal_ui.sepalwidgets import SepalWidget
 import component.parameter as param
 from component.message import cm
 import component.scripts.scripts as cs
+import sepal_ui.sepalwidgets as sw
 
 __all__ = [
-    "Card",
-    "Flex",
-    "Select",
     "DynamicSelect",
     "AlertMenu",
     "Tabs",
@@ -17,22 +14,7 @@ __all__ = [
 ]
 
 
-class Card(v.Card, SepalWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class Flex(v.Flex, SepalWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class Select(v.Select, SepalWidget):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class DynamicSelect(v.Card, SepalWidget):
+class DynamicSelect(sw.Card,):
 
     """Widget to navigate with next and previous buttons over a list
 
@@ -58,7 +40,7 @@ class DynamicSelect(v.Card, SepalWidget):
         super().__init__(**kwargs)
 
         self.close = v.Icon(children=["mdi-close"], small=True)
-        title = v.CardTitle(class_="pa-0 ma-0", children=[v.Spacer(), self.close])
+        title = sw.CardTitle(class_="pa-0 ma-0", children=[v.Spacer(), self.close])
 
         self.w_prev = v.Btn(
             _metadata={"name": "previous"},
@@ -113,18 +95,6 @@ class DynamicSelect(v.Card, SepalWidget):
     def prev_next_event(self, widget, change, data):
         """go to the next value. loop to the first or last one if we reach the end"""
 
-#         current = self.w_list.v_model
-#         position = -1 if not current else self.w_list.items.index(current)
-#         last = len(self.w_list.items) - 1
-
-#         if widget._metadata["name"] == "next":
-#             if position < last:
-#                 self.w_list.v_model = self.w_list.items[position + 1]
-#         elif widget._metadata["name"] == "previous":
-#             if position > 0:
-#                 self.w_list.v_model = self.w_list.items[position - 1]
-
-                
         increm = widget.value
         
         # get the current position in the list
@@ -181,7 +151,7 @@ class AlertMenu(v.Menu):
         self.children = [widget]
 
 
-class Tabs(v.Card):
+class Tabs(sw.Card):
 
     current = Int(0).tag(sync=True)
 
@@ -216,7 +186,7 @@ class Tabs(v.Card):
         super().__init__(**kwargs)
 
 
-class MetadataTable(v.Card, SepalWidget):
+class MetadataTable(sw.Card,):
     """Widget to get a simple table displaying the metadata of the alerts"""
 
     reviewed = Unicode("").tag(sync=True)
@@ -229,7 +199,7 @@ class MetadataTable(v.Card, SepalWidget):
         super().__init__(*args, **kwargs)
 
         self.close = v.Icon(children=["mdi-close"], small=True)
-        self.title = v.CardTitle(class_="pa-0 ma-0", children=[v.Spacer(), self.close])
+        self.title = sw.CardTitle(class_="pa-0 ma-0", children=[v.Spacer(), self.close])
 
         self.close.on_event("click", lambda *args: self.hide())
 

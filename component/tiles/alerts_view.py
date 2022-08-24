@@ -12,7 +12,6 @@ from sepal_ui.scripts import utils as su
 
 from component.message import cm
 from component.scripts.scripts import get_thresholds
-import component.widget as cw
 import component.parameter as param
 
 __all__ = ["AlertsView"]
@@ -43,11 +42,11 @@ class AlertsView(v.Card):
         self.dwbar_output = Output()
 
         # Satellite
-        self.w_satellite = cw.Select(label=cm.alerts.wlabel.satellite, v_model="viirs")
+        self.w_satellite = sw.Select(label=cm.alerts.wlabel.satellite, v_model="viirs")
         self.get_sat_sources()
 
         # Recent alerts
-        self.w_recent = cw.Select(
+        self.w_recent = sw.Select(
             label=cm.alerts.wlabel.in_the_last,
             items=[
                 {"text": text, "value": value}
@@ -72,7 +71,7 @@ class AlertsView(v.Card):
             v_model="",
         )
 
-        self.w_historic = cw.Flex(
+        self.w_historic = sw.Flex(
             class_="d-flex", children=[self.w_start, self.w_end]
         ).hide()
 
