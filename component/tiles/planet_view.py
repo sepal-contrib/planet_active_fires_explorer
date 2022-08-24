@@ -11,7 +11,6 @@ import sepal_ui.sepalwidgets as sw
 from sepal_ui.planetapi.planet_view import PlanetView as PV
 
 import component.parameter as param
-from component.scripts.scripts import PlanetKey, build_request, get_items
 from component.model import AlertModel
 from component.message import cm
 
@@ -26,7 +25,7 @@ CHIPS = {
 }
 
 
-class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
+class CustomPanel(sw.ExpansionPanel,):
     def __init__(self, model, widgets):
 
         # link with model
@@ -72,7 +71,7 @@ class CustomPanel(v.ExpansionPanel, sw.SepalWidget):
         self.header.children = [self.title] + chips
 
 
-class PlanetView(v.Card, sw.SepalWidget):
+class PlanetView(sw.Card):
 
     """Stand-alone component to get the user planet inputs and validate its
     configuration.
@@ -93,7 +92,9 @@ class PlanetView(v.Card, sw.SepalWidget):
             children=[cm.planet.default_api], type_="info"
         ).show()
 
-        self.w_planet_view = PV(planet_model=self.model.planet_model, alert=self.w_api_alert)
+        self.w_planet_view = PV(
+            planet_model=self.model.planet_model, alert=self.w_api_alert
+        )
 
         self.w_days_before = sw.NumberField(
             label=cm.planet.label.days_before,
@@ -180,7 +181,7 @@ class PlanetView(v.Card, sw.SepalWidget):
         lat = self.map_.lat
         lon = self.map_.lon
 
-        geom = json.loads(dumps(Point(lon, lat).buffer(0.001, cap_style=3)))
+        aoi = json.loads(dumps(Point(lon, lat).buffer(0.001, cap_style=3)))
 
         acqdate = self.model.aoi_alerts.loc[self.model.current_alert].acq_date
 
@@ -189,14 +190,11 @@ class PlanetView(v.Card, sw.SepalWidget):
         days_before = self.model.days_before
         days_after = self.model.days_after
 
-        start_date = now - datetime.timedelta(days=days_before)
-        future = now + datetime.timedelta(days=days_after + 1)
+        start = now - datetime.timedelta(days=days_before)
+        end = now + datetime.timedelta(days=days_after + 1)
+        cloud_cover = self.model.cloud_cover / 100
 
-        req = build_request(
-            geom, start_date, future, cloud_cover=self.model.cloud_cover / 100
-        )
-
-        return get_items("Alert", req, self.model.planet_model.client)
+        return ("Alert", self.model.planet_model.get_items(aoi, start, end, cloud_cover))
 
     def _prioritize_items(self, items):
         """Prioritize planet items"""
@@ -269,7 +267,7 @@ class PlanetView(v.Card, sw.SepalWidget):
             # remove all previous loaded assets
 
             self.map_.remove_layers_if("attribution", "Imagery © Planet Labs Inc.")
-            key = self.w_planet_view.planet_model.client.auth.value
+            key = self.w_planet_view.planet_model.session._client.auth.value
 
             for i, row in items_df.iterrows():
                 layer = TileLayer(
