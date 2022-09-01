@@ -2,13 +2,16 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 
 from component.model import AlertModel
-from component.tiles import AlertsView, AoiView, PlanetView
+from component.tiles import AlertsView, AoiView
+from component.tiles.planet_view import PlanetView
 from component.widget import Tabs
 
 __all__ = ["PanelTile"]
 
 
-class PanelTile(v.Card, sw.SepalWidget):
+class PanelTile(
+    sw.Card,
+):
 
     """Panel to incorporate each of the tabs that would be used for the end-
     user to validate their Planet API-key, select and area of interest and
@@ -21,6 +24,7 @@ class PanelTile(v.Card, sw.SepalWidget):
         self.min_height = "370px"
         self.min_width = "462px"
         self.max_width = "462px"
+        self.max_height = "550px"
         self.class_ = "pa-2"
 
         super().__init__(*args, **kwargs)

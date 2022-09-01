@@ -24,9 +24,7 @@ CHIPS = {
 }
 
 
-class CustomPanel(
-    sw.ExpansionPanel,
-):
+class CustomPanel(sw.ExpansionPanel):
     def __init__(self, model, widgets):
 
         # link with model
