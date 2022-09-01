@@ -1,22 +1,19 @@
 import json
-import pytz
-from datetime import datetime
 import urllib
+from datetime import datetime
 from pathlib import Path
 from zipfile import ZipFile
-from tqdm.auto import tqdm
 
-
-import pandas as pd
 import geopandas as gpd
-from shapely.geometry import Polygon
-
-from traitlets import Any, Bool, Unicode, Int, observe
+import pandas as pd
+import pytz
 from ipyleaflet import GeoJSON
-
+from sepal_ui import model
 from sepal_ui.planetapi import PlanetModel
 from sepal_ui.scripts.utils import random_string
-from sepal_ui import model
+from shapely.geometry import Polygon
+from tqdm.auto import tqdm
+from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
 import component.scripts.scripts as cs
@@ -55,7 +52,7 @@ class AlertModel(model.Model):
         self.alerts = None
         self.aoi_alerts = None
         self.current_alert = None
-        
+
         self.planet_model = PlanetModel()
 
         # It will store both draw and country geometry
@@ -127,7 +124,7 @@ class AlertModel(model.Model):
             # Validate y2 >= y1
             if end < start:
                 raise Exception("End date must be older than starting")
-            
+
             # Get unique year(s)
             years = list(range(start.year, end.year + 1))
 
@@ -177,7 +174,7 @@ class AlertModel(model.Model):
                     ]
                 )
                 all_dfs.append(dfs)
-                
+
             dfs = pd.concat(all_dfs)
 
             # Filter them with its date
@@ -189,13 +186,11 @@ class AlertModel(model.Model):
 
             # Cast again as string
             df["acq_date"] = df["acq_date"].astype(str)
-            
-        
+
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
 
-                
     def get_url(self):
         """Get the proper recent url based on the input satallite"""
 
