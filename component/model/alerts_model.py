@@ -16,7 +16,7 @@ from tqdm.auto import tqdm
 from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
-import component.scripts.scripts as cs
+import component.scripts as scripts
 
 
 class AlertModel(model.Model):
@@ -39,10 +39,16 @@ class AlertModel(model.Model):
     country = Unicode("").tag(sync=True)
 
     # Alerts type parameters
-    satsource = Unicode("viirs").tag(sync=True)
-    alerts_type = Unicode("recent").tag(sync=True)
-    start_date = Unicode("2020-01-01").tag(sync=True)
-    end_date = Unicode("2020-02-01").tag(sync=True)
+    firms_api_key = Unicode("").tag(sync=True)
+    "str: firms api key. it will be either the sepal one or given by user"
+    satsource = Unicode("modis_nrt").tag(sync=True)
+    "str: source of satellite. the available values must match parameter.SAT_SOURCE"
+    alerts_type = Unicode("nrt").tag(sync=True)
+    "str: type of alerts, either nrt (near real time) or historic"
+    start_date = Unicode("").tag(sync=True)
+    "str (YYYY-MM-DD format): initial date. for historic queries"
+    offset_days = Unicode("").tag(sync=True)
+    "str: number of offset days after the start date. for historic queries."
 
     def __init__(self, *args, **kwargs):
 
@@ -57,6 +63,13 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
+        self.availability = None
+
+    def get_availability(self):
+        """from a request call using the given firms api key. get and save
+        satellite availability as a list [satellite_id, min_date, max_date]"""
+
+        self.availability = scripts.get_availability(self.firms_api_key)
 
     def metadata_change(self, change):
         """Edit 'validate' and 'confidence' columns in the current aoi geodataframe.
@@ -248,7 +261,7 @@ class AlertModel(model.Model):
 
         def get_color(feature):
             confidence = feature["properties"]["confidence"]
-            color = cs.get_confidence_color(self.satsource, confidence)
+            color = scripts.get_confidence_color(self.satsource, confidence)
             return {
                 "color": color,
                 "fillColor": color,
