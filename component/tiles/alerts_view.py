@@ -1,78 +1,135 @@
 import datetime
-import warnings
 
 import ipyvuetify as v
+import pandas as pd
 import pytz
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON
-from ipywidgets import Output
 from numpy import float64
+from sepal_ui import color
 from sepal_ui.scripts import utils as su
+from sepal_ui.scripts.decorator import loading_button, switch
+from sepal_ui.scripts.warning import SepalWarning
+from traitlets import link
 
 import component.parameter as param
+import component.scripts as scripts
+import component.widget as cw
 from component.message import cm
-from component.scripts.scripts import get_thresholds
 
-__all__ = ["AlertsView"]
+__all__ = ["AlertsTile"]
 
 
-class AlertsView(v.Card):
-    def __init__(self, model, aoi, planet, map_, *args, **kwargs):
+class AlertsTile(sw.ExpansionPanels):
+    def __init__(self, model, aoi, planet, map_):
 
-        super().__init__(*args, **kwargs)
+        self.v_model = 0
+
+        super().__init__()
 
         self.model = model
         self.aoi = aoi
         self.map_ = map_
         self.planet = planet
 
-        # Widgets
-        self.alert = sw.Alert()
+        w_alert = sw.Alert().hide()
 
-        # Buttons
-        self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_="ma-2")
-        self.download_btn = sw.Btn(
-            cm.alerts.wlabel.download_btn, "mdi-download", class_="ma-2", disabled=True
+        self.alertsstep_view = AlertsView(
+            self.model, self.aoi, self.map_, self.planet, w_alert
+        )
+        self.authstep_view = AuthenticationView(
+            self.model, self, self.alertsstep_view, w_alert
         )
 
-        buttons = v.Flex(children=[self.btn, self.download_btn])
+        self.children = [self.authstep_view, self.alertsstep_view, w_alert]
 
-        # Create an output for the progress tqdm bar
-        self.dwbar_output = Output()
 
-        # Satellite
-        self.w_satellite = sw.Select(label=cm.alerts.wlabel.satellite, v_model="viirs")
-        self.get_sat_sources()
+class AuthenticationView(sw.ExpansionPanel):
+    def __init__(self, model, panels, alerts_view, w_alert):
 
-        # Recent alerts
-        self.w_recent = sw.Select(
-            label=cm.alerts.wlabel.in_the_last,
+        super().__init__()
+
+        self.model = model
+        self.panels = panels
+        self.alert = w_alert
+        self.btn = sw.Btn(cm.alerts.auth.btn, small=True)
+
+        states = {
+            "valid": ("Authenticated", color.success),
+            "non_valid": ("No authenticated", color.error),
+        }
+        self.w_auth_icon = cw.StateIcon(values="non_valid", states=states)
+        self.w_header = sw.ExpansionPanelHeader(
+            children=[
+                cm.alerts.steps.auth,
+                sw.Spacer(),
+                v.Flex(style_="max-width:20px;", children=[self.w_auth_icon]),
+            ]
+        )
+
+        self.alerts_view = alerts_view
+
+        w_description = sw.Markdown(cm.alerts.auth.description)
+        w_description.class_ = "px-3"
+
+        self.w_auth_method = sw.Select(
+            v_model="sepal",
+            label=cm.alerts.auth.method.label,
             items=[
-                {"text": text, "value": value}
-                for value, text in param.TIME_SPAN.items()
+                {"value": "sepal", "text": cm.alerts.auth.method.sepal},
+                {"value": "custom", "text": cm.alerts.auth.method.custom},
             ],
-            v_model=self.model.timespan,
         )
-
-        # Historic Alerts
-        self.w_start = sw.DatePicker(
-            label=cm.alerts.wlabel.start,
-            min="2000-01-01",
-            max=self.get_max_date(),
+        self.w_firms_api_key = sw.PasswordField(
+            label=cm.alerts.wlabel.firms_api,
             v_model="",
-        )
-
-        self.w_end = sw.DatePicker(
-            class_="ml-5",
-            label=cm.alerts.wlabel.end,
-            min="2000-01-01",
-            max=self.get_max_date(),
-            v_model="",
-        )
-
-        self.w_historic = sw.Flex(
-            class_="d-flex", children=[self.w_start, self.w_end]
         ).hide()
+
+        w_api = sw.Layout(
+            class_="align-center", children=[self.w_firms_api_key, self.btn]
+        )
+
+        self.children = [
+            self.w_header,
+            v.ExpansionPanelContent(
+                children=[w_description, self.w_auth_method, w_api]
+            ),
+        ]
+
+        self.btn.on_event("click", self.authenticate_event)
+        self.w_auth_method.observe(lambda *x: self.w_firms_api_key.toggle_viz())
+        self.model.bind(self.w_firms_api_key, "firms_api_key")
+
+    @loading_button(debug=True)
+    def authenticate_event(self, *args):
+        """Trigget authentication process"""
+
+        self.panels.v_model = 0
+        self.panels.children[1].disabled = True
+        self.w_auth_icon.values = "non_valid"
+
+        self.model.get_availability()
+        self.alerts_view.w_historic.set_min_max_dates()
+
+        self.w_auth_icon.values = "valid"
+        self.panels.v_model = 1
+        self.panels.children[1].disabled = False
+
+
+class AlertsView(sw.ExpansionPanel):
+    def __init__(self, model, aoi, map_, planet, w_alert):
+
+        self.disabled = True
+
+        super().__init__()
+
+        self.model = model
+        self.aoi = aoi
+        self.map_ = map_
+        self.planet = planet
+        self.alert = w_alert
+
+        self.w_header = sw.ExpansionPanelHeader(children=[cm.alerts.steps.alerts])
 
         # Selection type
         self.w_alerts_type = v.RadioGroup(
@@ -80,27 +137,50 @@ class AlertsView(v.Card):
             row=True,
             v_model=self.model.alerts_type,
             children=[
-                v.Radio(key=1, label=cm.alerts.wlabel.recent, value="recent"),
-                v.Radio(key=2, label=cm.alerts.wlabel.historical, value="historical"),
+                v.Radio(key=1, label=cm.alerts.wlabel.recent, value="nrt"),
+                v.Radio(key=2, label=cm.alerts.wlabel.historical, value="historic"),
             ],
         )
 
-        self.children = [
-            self.w_alerts_type,
-            self.w_satellite,
-            self.w_recent,
-            self.w_historic,
-            buttons,
-            self.alert,
-        ]
-
-        self.model.bind(self.w_alerts_type, "alerts_type").bind(
-            self.w_satellite, "satsource"
-        ).bind(self.w_recent, "timespan").bind(self.w_start, "start_date").bind(
-            self.w_end, "end_date"
+        self.alert = w_alert
+        self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_="ma-2")
+        self.download_btn = sw.Btn(
+            cm.alerts.wlabel.download_btn, "mdi-download", class_="ma-2", disabled=True
         )
-        # Decorate buttons
-        self.get_alerts = su.loading_button(self.alert, self.btn, True)(self.get_alerts)
+        buttons = v.Flex(children=[self.btn, self.download_btn])
+
+        self.w_satellite = sw.Select(
+            label=cm.alerts.wlabel.satellite, v_model="MODIS_NRT"
+        )
+        self.w_historic = WidgetHistoric(self.model).hide()
+
+        self.get_sat_sources()
+
+        self.w_timespan = sw.Select(
+            label=cm.alerts.wlabel.in_the_last,
+            items=[
+                {"text": text, "value": value}
+                for value, text in param.TIME_SPAN.items()
+            ],
+            v_model=self.model.offset_days,
+        )
+
+        self.model.bind(self.w_alerts_type, "alerts_type")
+        self.model.bind(self.w_satellite, "satsource")
+        link((self.model, "offset_days"), (self.w_timespan, "v_model"))
+
+        self.children = [
+            self.w_header,
+            sw.ExpansionPanelContent(
+                children=[
+                    self.w_alerts_type,
+                    self.w_satellite,
+                    self.w_timespan,
+                    self.w_historic,
+                    buttons,
+                ]
+            ),
+        ]
 
         # Decorate buttons
         self.write_alerts = su.loading_button(self.alert, self.download_btn, True)(
@@ -117,6 +197,20 @@ class AlertsView(v.Card):
         self.btn.on_event("click", self.get_alerts)
         self.download_btn.on_event("click", self.write_alerts)
 
+        # Every time a satellite has changed, we fill the min or max dates
+        self.w_satellite.observe(self.w_historic.set_min_max_dates, "v_model")
+
+    def get_sat_sources(self):
+        """Get the corresponding items for the satellite source dropdown widget
+        depending on the alerts type"""
+
+        self.w_satellite.items = [
+            {"text": v, "value": k}
+            for k, v in param.SAT_SOURCE[self.model.alerts_type].items()
+        ]
+
+        self.w_satellite.v_model = self.w_satellite.items[0]["value"]
+
     def write_alerts(self, *args):
         """Write AOI alerts into a shapefile on the module results"""
 
@@ -127,52 +221,20 @@ class AlertsView(v.Card):
             type_="success",
         )
 
-    def get_sat_sources(self):
-        """Get the corresponding items for the satellite source dropdown widget
-        depending on the alerts type
-        """
-
-        if self.model.alerts_type == "recent":
-            self.w_satellite.items = [
-                {"text": v[0], "value": k} for k, v in param.SATSOURCE.items()
-            ]
-        else:
-            # For historic periods only download the MODIS alerts
-            # because the other sources are really heavy so it's difficult to
-            # incorporate all this data in the maps
-            # TODO: Find a solution to download any type of satellite alerts
-            self.w_satellite.items = [
-                {"text": v[0], "value": k}
-                for k, v in param.SATSOURCE.items()
-                if k not in ["viirs", "viirsnoa"]
-            ]
-
-        self.w_satellite.v_model = self.w_satellite.items[0]["value"]
-
-    def get_max_date(self):
-        """Get the maximum available date for the historical data"""
-
-        now = datetime.datetime.now(tz=pytz.timezone("UTC"))
-        year = now.year
-
-        # The maximum available historic date is the current year - 1
-        return datetime.datetime.strftime(
-            datetime.datetime(year - 1, 12, 31), "%Y-%m-%d"
-        )
-
     def toggle_components(self, change):
         """Display recent or historical widget based on radios selection"""
 
         self.get_sat_sources()
 
-        if change["new"] == "recent":
-            su.show_component(self.w_recent)
-            su.hide_component(self.w_historic)
+        if change["new"] == "nrt":
+            self.w_historic.hide()
+            self.w_timespan.show()
 
-        elif change["new"] == "historical":
-            su.show_component(self.w_historic)
-            su.hide_component(self.w_recent)
+        elif change["new"] == "historic":
+            self.w_historic.show()
+            self.w_timespan.hide()
 
+    @loading_button(debug=True)
     def get_alerts(self, widget, change, data):
         """
         Get the corresponding alerts clipped to the area of interest
@@ -194,14 +256,7 @@ class AlertsView(v.Card):
 
         self.alert.add_live_msg(cm.ui.downloading_alerts, type_="info")
 
-        # Capture the tqdm bar with the output
-        with self.dwbar_output:
-
-            self.dwbar_output.clear_output()
-            self.alert.children = self.alert.children + [self.dwbar_output]
-
-            # Get the corresponding alerts
-            self.model.download_alerts()
+        self.model.get_firms_alerts()
 
         # Clip alerts_gdf to the selected aoi
         self.alert.add_msg(msg=cm.ui.clipping, type_="info")
@@ -237,19 +292,19 @@ class AlertsView(v.Card):
 
             if self.model.alerts_type == "recent":
                 msg = cm.ui.alert_number.format(
-                    len(self.model.aoi_alerts), self.model.timespan
+                    len(self.model.aoi_alerts), self.model.offset_days
                 )
             else:
                 msg = cm.ui.historic.alert_number.format(
                     len(self.model.aoi_alerts),
                     self.model.start_date,
-                    self.model.end_date,
+                    self.model.offset_days,
                 )
 
             self.alert.add_msg(msg, type_="success")
 
         else:
-            warnings.warn(
+            SepalWarning(
                 cm.alerts.overloaded.format(
                     len(self.model.aoi_alerts), param.MAX_ALERTS
                 )
@@ -273,7 +328,7 @@ class AlertsView(v.Card):
 
             else:
 
-                upper, lower = get_thresholds(lower=confidence)
+                upper, lower = scripts.get_thresholds(lower=confidence)
                 self.map_.w_alerts.items = self.model.aoi_alerts[
                     (self.model.aoi_alerts.confidence <= upper)
                     & (self.model.aoi_alerts.confidence > lower)
@@ -332,3 +387,79 @@ class AlertsView(v.Card):
             # Search and add layers to map
             if self.model.planet_model.active:
                 self.planet.add_planet_imagery()
+
+
+class WidgetHistoric(sw.Layout):
+    """Historic widget containing three components: start date, add_icon, and offset
+    days selection llist. It will be used to caputure the user's input related with
+    the historic data. The widget allow to capture and perform the user interactions."""
+
+    def __init__(self, model):
+
+        self.model = model
+        self.class_ = "d-flex"
+        self.align_center = True
+
+        super().__init__()
+
+        # Historic Alerts
+        self.w_date = cw.DatePicker(
+            label=cm.alerts.wlabel.start, style_="min-width:181px", v_model=""
+        )
+
+        self.w_days = sw.Select(
+            label=cm.alerts.wlabel.plus_offset,
+            style_="min-width:151px",
+            items=[
+                {"text": text, "value": value}
+                for value, text in param.TIME_SPAN.items()
+            ],
+            v_model=self.model.offset_days,
+        )
+
+        add_icon = v.Btn(
+            children=[
+                v.Icon(
+                    children=["mdi-plus"],
+                )
+            ],
+            fab=True,
+            x_small=True,
+        )
+
+        self.model.bind(self.w_date, "start_date")
+        link((self.model, "offset_days"), (self.w_days, "v_model"))
+
+        self.children = [
+            v.Flex(xs5=True, children=[self.w_date]),
+            v.Flex(xs2=True, class_="mx-2", children=[add_icon]),
+            v.Flex(xs5=True, children=[self.w_days]),
+        ]
+
+        add_icon.on_event("click", self.add_days)
+
+    def set_min_max_dates(self, *args):
+        """from a request. use the already available availability df to set min and max
+        dates in the date_picker."""
+
+        if self.model.availability is not None:
+
+            # Get the picker as it is embbeded into the menu that wraps the widget.
+            data = self.model.availability
+            _, self.w_date.date_picker.min, self.w_date.date_picker.max = (
+                data[
+                    data.data_id
+                    == param.SAT_SOURCE[self.model.alerts_type][self.model.satsource]
+                ]
+                .values[0]
+                .tolist()
+            )
+            self.w_date.date_picker.v_model = self.w_date.date_picker.max
+
+    def add_days(self, *args):
+        """set the next of the current value from the w_days items"""
+
+        items_value = [item["value"] for item in self.w_days.items]
+        self.w_days.v_model = items_value[
+            min(items_value.index(self.w_days.v_model) + 1, len(items_value) - 1)
+        ]
