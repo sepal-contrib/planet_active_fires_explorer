@@ -26,12 +26,31 @@
         }
     },
     "alerts" : {
+        "steps" : {
+            "auth" : "Authentication",
+            "alerts" : "Retrieve alerts"
+        },
+        "auth" : {
+            "description" : "To retrieve the fire alerts from FIRMS platform SEPAL is using its custom API key, this is however a limited service and its availability will depend on all the users usage. You can request your own API in <a href='https://firms.modaps.eosdis.nasa.gov/api/data_availability/' target='_blank'>this link</a>, and just click the blue 'Get MAP_KEY' button at the bottom of the website, and use it here.",
+            "btn" : "Authenticate",
+            "method" : {
+                "label" : "Set API key method",
+                "sepal" : "SEPAL FIRMS API key",
+                "custom" : "Custom user key"
+            },
+            "errors" : {
+                "no_input" : "You have to use a FIRMS API key to do the authentication. Please fill the field.",
+                "no_value" : "We couldn't find a proper FIRMS API key to get the server connection. Please create your own API.",
+                "invalid_firms_key" : "Invalid FIRMS API key, please check your inputs."
+            }
+        },
         "wlabel": {
+            "firms_api" : "Custom FIRMS API key",
+            "plus_offset" : "Plus up to days (after)",
             "get_alerts" : "Get alerts",
             "satellite" : "Satellite source",
             "in_the_last" : "In the last",
-            "start":"Start date (inclusive)",
-            "end":"End date (inclusive)",
+            "start":"Start date",
             "alert_type" : "Type of alerts",
             "recent" : "Recent",
             "historical" : "Historical",
@@ -53,7 +72,7 @@
         },
         "hour24": "24 hours",
         "hour48": "48 hours",
-        "day7": "7 days",
+        "days": "days",
         "exported": "Alerts successfully exported in {} folder as {}.shp.",
         "overloaded" : "There are {} alerts for the given AOI and date ranges. The map will not display them, you might want download them with the 'download button' or reduce the AOI/date range to get less than {} alerts."
     },

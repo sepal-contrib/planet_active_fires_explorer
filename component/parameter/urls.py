@@ -1,12 +1,13 @@
-# Path to download all historic fires for a given year
-HISTORIC_URL = (
-    "https://firms2.modaps.eosdis.nasa.gov/data/country/zips/{}_{}_all_countries.zip"
-)
+API_URL = "https://firms.modaps.eosdis.nasa.gov/api/"
 
-#  3gpd.read_file
-RECENT_URL = (
-    "https://firms.modaps.eosdis.nasa.gov/data/active_fire/{}/csv/{}_Global_{}.csv"
-)
+# FIRMS_KEY, sat_source, bounds, offset_days
+REQUEST_RECENT = API_URL + "area/csv/{}/{}/{}/{}"
+
+# Just add the last parameter "start_date"
+REQUEST_HISTORIC = REQUEST_RECENT + "/{}"
+
+# {firms_api_key}: get satellite sources and availability dates
+AVAILABILITY_URL = API_URL + "data_availability/csv/{}/ALL"
 
 PLANET_TILES_URL = (
     "https://tiles0.planet.com/data/v1/{}/{}/{{z}}/{{x}}/{{y}}.png?api_key={}"

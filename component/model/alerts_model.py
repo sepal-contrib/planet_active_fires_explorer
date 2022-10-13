@@ -1,4 +1,5 @@
 import json
+import os
 import urllib
 from datetime import datetime
 from pathlib import Path
@@ -16,7 +17,7 @@ from tqdm.auto import tqdm
 from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
-import component.scripts.scripts as cs
+import component.scripts as scripts
 
 
 class AlertModel(model.Model):
@@ -25,7 +26,6 @@ class AlertModel(model.Model):
     reset = Bool(False).tag(sync=True)
 
     # Input parameters
-    timespan = Unicode("24h").tag(sync=True)
 
     # Planet parameters
 
@@ -39,10 +39,16 @@ class AlertModel(model.Model):
     country = Unicode("").tag(sync=True)
 
     # Alerts type parameters
-    satsource = Unicode("viirs").tag(sync=True)
-    alerts_type = Unicode("recent").tag(sync=True)
-    start_date = Unicode("2020-01-01").tag(sync=True)
-    end_date = Unicode("2020-02-01").tag(sync=True)
+    firms_api_key = Unicode("").tag(sync=True)
+    "str: firms api key. it will be either the sepal one or given by user"
+    satsource = Unicode("modis_nrt").tag(sync=True)
+    "str: source of satellite. the available values must match parameter.SAT_SOURCE"
+    alerts_type = Unicode("nrt").tag(sync=True)
+    "str: type of alerts, either nrt (near real time) or historic"
+    start_date = Unicode("").tag(sync=True)
+    "str (YYYY-MM-DD format): initial date. for historic queries"
+    offset_days = Unicode("24h").tag(sync=True)
+    "str: number of offset days after the start date. for historic queries."
 
     def __init__(self, *args, **kwargs):
 
@@ -57,6 +63,37 @@ class AlertModel(model.Model):
 
         # It will store both draw and country geometry
         self.aoi_geometry = None
+        self.availability = None
+
+    def get_availability(self):
+        """from a request call using the given firms api key. get and save
+        satellite availability as a list [satellite_id, min_date, max_date]"""
+
+        self.availability = scripts.get_availability(self.firms_api_key)
+
+    def get_alerts_url(self, firms_key=None):
+        """build the firms url to retrieve alerts depending on the users inputs stored
+        in the model"""
+
+        firms_api_key = os.getenv("FIRMS_API_KEY") or firms_key
+
+        sat_source = param.SAT_SOURCE[self.alerts_type][self.satsource]
+        bounds = ",".join(
+            list(
+                str(int(x))
+                for x in gpd.GeoDataFrame.from_features(self.aoi_geometry).total_bounds
+            )
+        )
+        offset_days = scripts.parse_offset(self.offset_days)
+        start_date = self.start_date
+
+        # Depending on the type of alerts, the args to the request will vary.
+        args = [firms_api_key, sat_source, bounds, offset_days, start_date]
+
+        if self.alerts_type == "nrt":
+            return param.REQUEST_RECENT.format(*args[:-1])
+
+        return param.REQUEST_HISTORIC.format(*args)
 
     def metadata_change(self, change):
         """Edit 'validate' and 'confidence' columns in the current aoi geodataframe.
@@ -106,97 +143,14 @@ class AlertModel(model.Model):
 
         return folder, name
 
-    def download_alerts(self):
-        """Download the corresponding alerts based on the selected alert type"""
+    def get_firms_alerts(self):
+        """from a parsed API URL, perform the request by using a pandas geodataframe"""
 
-        if self.alerts_type == "recent":
-            # Donwload recent alerts
-            df = pd.read_csv(self.get_url())
-
-        else:
-            # Download historical alerts
-            start = datetime.strptime(self.start_date, "%Y-%m-%d")
-            end = datetime.strptime(self.end_date, "%Y-%m-%d")
-
-            # Get the corresponding sat name to concatenate the historic url
-            sat = "modis" if self.satsource == "modis" else "viirs-snpp"
-
-            # Validate y2 >= y1
-            if end < start:
-                raise Exception("End date must be older than starting")
-
-            # Get unique year(s)
-            years = list(range(start.year, end.year + 1))
-
-            # Download all the fires between the given dates
-            all_dfs = []
-            for y in years:
-
-                # Verify if the files is not previously downloaded
-                out_file = param.HISTORIC_DIR / f"historic_{sat}_fires_{y}.zip"
-
-                if not out_file.exists():
-
-                    url = param.HISTORIC_URL.format(sat, y)
-                    response = getattr(urllib, "request", urllib).urlopen(url)
-                    with tqdm(
-                        unit="B",
-                        unit_scale=True,
-                        unit_divisor=1024,
-                        miniters=1,
-                        desc="downloading...",
-                        bar_format=param.BAR_FORMAT,
-                        dynamic_ncols=True,
-                        total=getattr(response, "length"),
-                    ) as f:
-
-                        def callback(b, bsize, tsize):
-                            f.update(b * bsize - f.n)
-
-                        urllib.request.urlretrieve(url, out_file, callback)
-
-                        f.total = f.n
-
-                # Open all fires into the zipped files and merge
-                # thme into one single DataFrame
-
-                zip_file = ZipFile(out_file)
-                dfs = pd.concat(
-                    [
-                        pd.read_csv(zip_file.open(text_file.filename))
-                        for text_file in tqdm(
-                            zip_file.infolist(),
-                            desc="unzipping...",
-                            dynamic_ncols=True,
-                            bar_format=param.BAR_FORMAT,
-                        )
-                        if text_file.filename.endswith(".csv")
-                    ]
-                )
-                all_dfs.append(dfs)
-
-            dfs = pd.concat(all_dfs)
-
-            # Filter them with its date
-            dfs.acq_date = pd.to_datetime(dfs.acq_date)
-
-            df = gpd.GeoDataFrame(
-                dfs[(dfs.acq_date >= start) & (dfs.acq_date <= end)]
-            ).reset_index(drop=True)
-
-            # Cast again as string
-            df["acq_date"] = df["acq_date"].astype(str)
+        df = pd.read_csv(self.get_alerts_url())
 
         self.alerts = gpd.GeoDataFrame(
             df, geometry=gpd.points_from_xy(df.longitude, df.latitude), crs="EPSG:4326"
         ).reset_index()
-
-    def get_url(self):
-        """Get the proper recent url based on the input satallite"""
-
-        sat = param.SATSOURCE[self.satsource]
-
-        return param.RECENT_URL.format(sat[1], sat[0], self.timespan)
 
     def clip_to_aoi(self):
         """Clip recent or historical geodataframe with area of interest and save it."""
@@ -248,7 +202,7 @@ class AlertModel(model.Model):
 
         def get_color(feature):
             confidence = feature["properties"]["confidence"]
-            color = cs.get_confidence_color(self.satsource, confidence)
+            color = scripts.get_confidence_color(self.satsource, confidence)
             return {
                 "color": color,
                 "fillColor": color,

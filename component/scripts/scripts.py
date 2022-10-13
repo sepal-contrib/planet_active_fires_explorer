@@ -5,6 +5,7 @@ import component.parameter as param
 __all__ = [
     "get_thresholds",
     "get_confidence_color",
+    "parse_offset",
 ]
 
 
@@ -15,6 +16,19 @@ def get_thresholds(lower):
     upper = 100 if thres.index(lower) == 0 else thres[thres.index(lower) - 1]
 
     return (upper, lower)
+
+
+def parse_offset(offset):
+    """it will return a parsed integer from text offsets available in
+    offset_days widget items.
+
+    Example:
+        [parse_ofsset(offset) for offset in ['24 hours', '48 hours', '3 days']]
+        [1, 2, 3]
+    """
+
+    number = int("".join(filter(str.isdigit, offset)))
+    return number if number < 11 else int(number / 24)
 
 
 def get_confidence_color(satsource, value):
@@ -28,7 +42,7 @@ def get_confidence_color(satsource, value):
     """
 
     # Get the type of the confidence representation, categorical or discrete
-    type_ = "disc" if satsource == "modis" else "cat"
+    type_ = "disc" if satsource in ["modis_sp", "modis_nrt"] else "cat"
 
     # Get category name and color into a dictionary
     confidence_color = {k: v[1] for k, v in param.CONFIDENCE[type_].items()}

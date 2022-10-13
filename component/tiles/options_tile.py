@@ -2,7 +2,7 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 
 from component.model import AlertModel
-from component.tiles import AlertsView, AoiView
+from component.tiles import AlertsTile, AoiView
 from component.tiles.planet_view import PlanetView
 from component.widget import Tabs
 
@@ -21,7 +21,7 @@ class PanelTile(
 
     def __init__(self, map_, model, *args, **kwargs):
 
-        self.min_height = "370px"
+        self.min_height = "550px"
         self.min_width = "462px"
         self.max_width = "462px"
         self.max_height = "550px"
@@ -39,7 +39,7 @@ class PanelTile(
 
         self.planet = PlanetView(self.model, self.map_)
         self.aoi = AoiView(self.model, self.map_)
-        self.alerts = AlertsView(self.model, self.aoi, self.planet, self.map_)
+        self.alerts = AlertsTile(self.model, self.aoi, self.planet, self.map_)
 
         widgets = [self.planet, self.aoi, self.alerts]
 
