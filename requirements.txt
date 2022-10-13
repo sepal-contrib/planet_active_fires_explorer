@@ -21,6 +21,6 @@ colorama==0.4.3
 requests==2.22.0
 shapely_geojson==0.0.1
 
-pytz==2019.3
+pytz>=2020.1
 Shapely==1.8.4
 cryptography>=2.1.4
