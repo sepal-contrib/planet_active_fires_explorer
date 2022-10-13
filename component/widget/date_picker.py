@@ -4,6 +4,8 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 from traitlets import Bool, link, observe
 
+__all__ = ["DatePicker"]
+
 
 class DatePicker(sw.Layout):
     """

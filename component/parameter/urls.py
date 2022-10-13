@@ -1,7 +1,10 @@
 API_URL = "https://firms.modaps.eosdis.nasa.gov/api/"
 
-# FIRMS_KEY, sat_source, coordinates, date_range, date
-REQUEST_URL = API_URL + "area/csv/{}/{}/{}/{}/{}"
+# FIRMS_KEY, sat_source, bounds, offset_days
+REQUEST_RECENT = API_URL + "area/csv/{}/{}/{}/{}"
+
+# Just add the last parameter "start_date"
+REQUEST_HISTORIC = REQUEST_RECENT + "/{}"
 
 # {firms_api_key}: get satellite sources and availability dates
 AVAILABILITY_URL = API_URL + "data_availability/csv/{}/ALL"

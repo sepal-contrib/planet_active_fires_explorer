@@ -21,6 +21,9 @@ __all__ = ["AlertsTile"]
 
 
 class AlertsTile(sw.ExpansionPanels):
+    """Alerts tile component is the tab where the firms authentication process is done
+    as well as the process to request the alerts from the FIRMS API"""
+
     def __init__(self, model, aoi, planet, map_):
 
         self.v_model = 0
@@ -32,26 +35,20 @@ class AlertsTile(sw.ExpansionPanels):
         self.map_ = map_
         self.planet = planet
 
-        w_alert = sw.Alert().hide()
+        self.alertsstep_view = AlertsView(self.model, self.aoi, self.map_, self.planet)
+        self.authstep_view = AuthenticationView(self.model, self, self.alertsstep_view)
 
-        self.alertsstep_view = AlertsView(
-            self.model, self.aoi, self.map_, self.planet, w_alert
-        )
-        self.authstep_view = AuthenticationView(
-            self.model, self, self.alertsstep_view, w_alert
-        )
-
-        self.children = [self.authstep_view, self.alertsstep_view, w_alert]
+        self.children = [self.authstep_view, self.alertsstep_view]
 
 
 class AuthenticationView(sw.ExpansionPanel):
-    def __init__(self, model, panels, alerts_view, w_alert):
+    def __init__(self, model, panels, alerts_view):
 
         super().__init__()
 
         self.model = model
         self.panels = panels
-        self.alert = w_alert
+        self.alert = sw.Alert()
         self.btn = sw.Btn(cm.alerts.auth.btn, small=True)
 
         states = {
@@ -92,17 +89,33 @@ class AuthenticationView(sw.ExpansionPanel):
         self.children = [
             self.w_header,
             v.ExpansionPanelContent(
-                children=[w_description, self.w_auth_method, w_api]
+                children=[w_description, self.w_auth_method, w_api, self.alert]
             ),
         ]
 
         self.btn.on_event("click", self.authenticate_event)
-        self.w_auth_method.observe(lambda *x: self.w_firms_api_key.toggle_viz())
-        self.model.bind(self.w_firms_api_key, "firms_api_key")
+        self.w_auth_method.observe(self.reset_auth_widget, "v_model")
+        link((self.model, "firms_api_key"), (self.w_firms_api_key, "v_model"))
+
+    def reset_auth_widget(self, change):
+        """Toggle w_auth_method widget visibility and empty its v_model value"""
+
+        self.alert.reset()
+        self.w_firms_api_key.error_messages = None
+        self.w_firms_api_key.toggle_viz()
+        self.w_firms_api_key.v_model = ""
 
     @loading_button(debug=True)
     def authenticate_event(self, *args):
-        """Trigget authentication process"""
+        """Trigger authentication process"""
+
+        self.w_firms_api_key.error_messages = None
+
+        if self.w_auth_method.v_model == "custom":
+            if not self.w_firms_api_key.v_model:
+                # raise error onw_firms_api_key widget
+                self.w_firms_api_key.error_messages = cm.alerts.auth.errors.no_input
+                return
 
         self.panels.v_model = 0
         self.panels.children[1].disabled = True
@@ -117,7 +130,7 @@ class AuthenticationView(sw.ExpansionPanel):
 
 
 class AlertsView(sw.ExpansionPanel):
-    def __init__(self, model, aoi, map_, planet, w_alert):
+    def __init__(self, model, aoi, map_, planet):
 
         self.disabled = True
 
@@ -127,13 +140,14 @@ class AlertsView(sw.ExpansionPanel):
         self.aoi = aoi
         self.map_ = map_
         self.planet = planet
-        self.alert = w_alert
+        self.alert = sw.Alert()
 
         self.w_header = sw.ExpansionPanelHeader(children=[cm.alerts.steps.alerts])
 
         # Selection type
         self.w_alerts_type = v.RadioGroup(
-            label=cm.alerts.wlabel.alert_type,
+            small=True,
+            class_="ma-0",
             row=True,
             v_model=self.model.alerts_type,
             children=[
@@ -142,10 +156,13 @@ class AlertsView(sw.ExpansionPanel):
             ],
         )
 
-        self.alert = w_alert
-        self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_="ma-2")
+        self.btn = sw.Btn(cm.alerts.wlabel.get_alerts, class_="ma-2", small=True)
         self.download_btn = sw.Btn(
-            cm.alerts.wlabel.download_btn, "mdi-download", class_="ma-2", disabled=True
+            cm.alerts.wlabel.download_btn,
+            "mdi-download",
+            class_="ma-2",
+            disabled=True,
+            small=True,
         )
         buttons = v.Flex(children=[self.btn, self.download_btn])
 
@@ -178,6 +195,7 @@ class AlertsView(sw.ExpansionPanel):
                     self.w_timespan,
                     self.w_historic,
                     buttons,
+                    self.alert,
                 ]
             ),
         ]

@@ -14,9 +14,7 @@ __all__ = [
 ]
 
 
-class DynamicSelect(
-    sw.Card,
-):
+class DynamicSelect(sw.Card):
 
     """Widget to navigate with next and previous buttons over a list
 

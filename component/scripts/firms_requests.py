@@ -3,8 +3,8 @@ import os
 import pandas as pd
 import requests
 
-import component.message as cm
 import component.parameter as param
+from component.message import cm
 
 
 def get_availability(firms_key=None):
@@ -14,16 +14,17 @@ def get_availability(firms_key=None):
         firms_key (str, optional): api key if not found environment key.
     """
 
-    firms_key = os.getenv("FIRMS_API_KEY") or firms_key
+    firms_key = firms_key or os.getenv("FIRMS_API_KEY")
 
     if not firms_key:
-        raise Exception(cm.errors.no_firms_key)
+        raise Exception(cm.alerts.auth.errors.no_value)
 
     request_url = param.AVAILABILITY_URL.format(firms_key)
+    response = requests.get(request_url)
 
-    # response = requests.get(request_url)
-
-    # if response.status_code == 200:
-    return pd.read_csv(request_url)
-    # else:
-    #     raise Exception(cm.errors.invalid_firms_key)
+    # It will return code "200" even if the key doesn't work. let's use the content
+    # to determine if the connection was successfull
+    if response.text != "Invalid MAP_KEY.":
+        return pd.read_csv(request_url)
+    else:
+        raise Exception(cm.alerts.auth.errors.invalid_firms_key)

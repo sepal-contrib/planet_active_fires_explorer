@@ -37,6 +37,11 @@
                 "label" : "Set API key method",
                 "sepal" : "SEPAL FIRMS API key",
                 "custom" : "Custom user key"
+            },
+            "errors" : {
+                "no_input" : "You have to use a FIRMS API key to do the authentication. Please fill the field.",
+                "no_value" : "We couldn't find a proper FIRMS API key to get the server connection. Please create your own API.",
+                "invalid_firms_key" : "Invalid FIRMS API key, please check your inputs."
             }
         },
         "wlabel": {

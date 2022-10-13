@@ -16,7 +16,13 @@ SAT_SOURCE = {
         "viirs_noaa_nrt": "VIIRS_NOAA20_NRT",
         "viirs_snpp_nrt": "VIIRS_SNPP_NRT",
     },
-    "historic": {"modis_sp": "MODIS_SP", "viirs_sp": "VIIRS_SNPP_SP"},
+    "historic": {
+        "modis_sp": "MODIS_SP",
+        "viirs_sp": "VIIRS_SNPP_SP",
+        "modis_nrt": "MODIS_NRT",
+        "viirs_noaa_nrt": "VIIRS_NOAA20_NRT",
+        "viirs_snpp_nrt": "VIIRS_SNPP_NRT",
+    },
 }
 
 CONFIDENCE = {
@@ -25,6 +31,10 @@ CONFIDENCE = {
         "high": ["high", "green"],
         "nominal": ["nominal", "orange"],
         "low": ["low", "red"],
+        # Some data has changed, now they're using the abbreviation.
+        "h": ["high", "green"],
+        "n": ["nominal", "orange"],
+        "l": ["low", "red"],
     },
     "disc": {80: [">80", "green"], 50: [">50, <80", "orange"], 30: ["<50", "red"]},
 }

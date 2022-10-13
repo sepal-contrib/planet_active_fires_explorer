@@ -20,15 +20,15 @@ class AlertMap(m.SepalMap):
 
         kwargs["dc"] = True
         kwargs["gee"] = False
-        kwargs["basemaps"] = ["SATELLITE"]
+        # kwargs["basemaps"] = ["SATELLITE"]
         kwargs["statebar"] = False
 
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(
-            m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
-        )
+        # self.add_control(
+        #     m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
+        # )
 
         self.reload_btn = m.MapBtn("fas fa-sync-alt")
         self.parameters_btn = m.MapBtn("fas fa-bars")
