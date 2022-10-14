@@ -154,6 +154,7 @@ class PlanetView(sw.Card):
 
         # ui events
         self.panels.observe(self._on_panel_change, "v_model")
+        self.w_planet_view.planet_model.observe(self._toggle_planet_setts, "active")
 
     def _on_panel_change(self, change):
         """Expand or shrunk content"""
@@ -163,11 +164,13 @@ class PlanetView(sw.Card):
         else:
             self.panels.children[0].shrunk_content()
 
-    def _toggle_planet_setts(self, on=True):
-        """Toggle planet widgets"""
+    def _toggle_planet_setts(self, change):
+        """Toggle planet widgets depending on the planet widget authentication"""
 
         for w in self.components:
-            setattr(w, "disabled", False) if on else setattr(w, "disabled", True)
+            setattr(w, "disabled", False) if change["new"] else setattr(
+                w, "disabled", True
+            )
 
     def _get_items(self):
         """Get planet items based on the current coordinates"""

@@ -9,9 +9,7 @@ from component.widget import Tabs
 __all__ = ["PanelTile"]
 
 
-class PanelTile(
-    sw.Card,
-):
+class PanelTile(sw.Card):
 
     """Panel to incorporate each of the tabs that would be used for the end-
     user to validate their Planet API-key, select and area of interest and
