@@ -30,10 +30,10 @@ class AlertMap(m.SepalMap):
             m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
         )
 
-        self.reload_btn = m.MapBtn("fas fa-sync-alt")
-        self.parameters_btn = m.MapBtn("fas fa-bars")
-        self.navigate_btn = m.MapBtn("fas fa-fire")
-        self.metadata_btn = m.MapBtn("fas fa-info-circle")
+        self.reload_btn = m.MapBtn("fa-solid fa-sync-alt")
+        self.parameters_btn = m.MapBtn("fa-solid fa-bars")
+        self.navigate_btn = m.MapBtn("fa-solid fa-fire")
+        self.metadata_btn = m.MapBtn("fa-solid fa-info-circle")
 
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
 
@@ -151,7 +151,7 @@ class AlertMap(m.SepalMap):
     def set_code(self, link):
         "add the code link btn to the map"
 
-        btn = m.MapBtn("fas fa-code", href=link, target="_blank")
+        btn = m.MapBtn("fa-solid fa-code", href=link, target="_blank")
         control = WidgetControl(widget=btn, position="bottomleft")
         self.add_control(control)
 
@@ -160,7 +160,7 @@ class AlertMap(m.SepalMap):
     def set_wiki(self, link):
         "add the wiki link btn to the map"
 
-        btn = m.MapBtn("fas fa-book-open", href=link, target="_blank")
+        btn = m.MapBtn("fa-solid fa-book-open", href=link, target="_blank")
         control = WidgetControl(widget=btn, position="bottomleft")
         self.add_control(control)
 
@@ -169,7 +169,7 @@ class AlertMap(m.SepalMap):
     def set_issue(self, link):
         "add the code link btn to the map"
 
-        btn = m.MapBtn("fas fa-bug", href=link, target="_blank")
+        btn = m.MapBtn("fa-solid fa-bug", href=link, target="_blank")
         control = WidgetControl(widget=btn, position="bottomleft")
         self.add_control(control)
 
