@@ -7,14 +7,12 @@ import component.parameter as param
 from component.message import cm
 
 
-def get_availability(firms_key=None):
+def get_availability(firms_key):
     """request data availability (dates) from a request on the fly.
 
     Args:
         firms_key (str, optional): api key if not found environment key.
     """
-
-    firms_key = firms_key or os.getenv("FIRMS_API_KEY")
 
     if not firms_key:
         raise Exception(cm.alerts.auth.errors.no_value)

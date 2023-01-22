@@ -40,7 +40,7 @@ class AlertModel(model.Model):
 
     # Alerts type parameters
     firms_api_key = Unicode("").tag(sync=True)
-    "str: firms api key. it will be either the sepal one or given by user"
+    "str: firms api key. it will be either the sepal one or given by user. It will be gathered from authenticate_event."
     satsource = Unicode("modis_nrt").tag(sync=True)
     "str: source of satellite. the available values must match parameter.SAT_SOURCE"
     alerts_type = Unicode("nrt").tag(sync=True)
@@ -65,17 +65,9 @@ class AlertModel(model.Model):
         self.aoi_geometry = None
         self.availability = None
 
-    def get_availability(self):
-        """from a request call using the given firms api key. get and save
-        satellite availability as a list [satellite_id, min_date, max_date]"""
-
-        self.availability = scripts.get_availability(self.firms_api_key)
-
-    def get_alerts_url(self, firms_key=None):
+    def get_alerts_url(self):
         """build the firms url to retrieve alerts depending on the users inputs stored
         in the model"""
-
-        firms_api_key = os.getenv("FIRMS_API_KEY") or firms_key
 
         sat_source = param.SAT_SOURCE[self.alerts_type][self.satsource]
         bounds = ",".join(
@@ -88,7 +80,7 @@ class AlertModel(model.Model):
         start_date = self.start_date
 
         # Depending on the type of alerts, the args to the request will vary.
-        args = [firms_api_key, sat_source, bounds, offset_days, start_date]
+        args = [self.firms_api_key, sat_source, bounds, offset_days, start_date]
 
         if self.alerts_type == "nrt":
             return param.REQUEST_RECENT.format(*args[:-1])

@@ -1,4 +1,5 @@
 import datetime
+import os
 
 import ipyvuetify as v
 import pandas as pd
@@ -14,6 +15,7 @@ from traitlets import link
 
 import component.parameter as param
 import component.scripts as scripts
+import component.scripts.firms_requests as firms
 import component.widget as cw
 from component.message import cm
 
@@ -121,7 +123,11 @@ class AuthenticationView(sw.ExpansionPanel):
         self.panels.children[1].disabled = True
         self.w_auth_icon.values = "non_valid"
 
-        self.model.get_availability()
+        self.model.firms_api_key = self.w_firms_api_key.v_model or os.getenv(
+            "FIRMS_API_KEY"
+        )
+        self.model.availability = firms.get_availability(self.model.firms_api_key)
+
         self.alerts_view.w_historic.set_min_max_dates()
 
         self.w_auth_icon.values = "valid"
