@@ -1,0 +1,4 @@
+/*set a minimum height for map widget*/
+.jupyter-widgets.leaflet-widgets {
+    height: 650px;
+}

@@ -41,7 +41,8 @@
             "errors" : {
                 "no_input" : "You have to use a FIRMS API key to do the authentication. Please fill the field.",
                 "no_value" : "We couldn't find a proper FIRMS API key to get the server connection. Please create your own API.",
-                "invalid_firms_key" : "Invalid FIRMS API key, please check your inputs."
+                "invalid_firms_key" : "Invalid FIRMS API key, please check your inputs.",
+                "no_sepal_key" : "No SEPAL FIRMS key found, please create your own key and select 'Custom user key'."
             }
         },
         "wlabel": {

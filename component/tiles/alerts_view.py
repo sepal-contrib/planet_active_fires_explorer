@@ -124,8 +124,12 @@ class AuthenticationView(sw.ExpansionPanel):
         self.w_auth_icon.values = "non_valid"
 
         self.model.firms_api_key = self.w_firms_api_key.v_model or os.getenv(
-            "FIRMS_API_KEY"
+            "FIRMS_API_KEY", ""
         )
+
+        if not self.model.firms_api_key:
+            raise Exception(cm.alerts.auth.errors.no_sepal_key)
+
         self.model.availability = firms.get_availability(self.model.firms_api_key)
 
         self.alerts_view.w_historic.set_min_max_dates()

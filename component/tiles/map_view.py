@@ -17,10 +17,10 @@ class AlertMap(m.SepalMap):
 
         self.lat = None
         self.lon = None
+        self.min_zoom = 2
 
         kwargs["dc"] = True
         kwargs["gee"] = False
-        # kwargs["basemaps"] = ["SATELLITE"]
         kwargs["statebar"] = False
 
         super().__init__(*args, **kwargs)
