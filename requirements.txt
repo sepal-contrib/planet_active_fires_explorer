@@ -28,3 +28,8 @@ cryptography>=2.1.4
 # widgets are not displayed when using ipyvuetify==1.8.4 and ipywidgets==8.0.2
 ipyvuetify==1.8.2
 ipywidgets==7.6.5
+
+
+
+# for patched version of sepal_ui.planetapi.
+typing-extensions
