@@ -10,7 +10,6 @@ import pandas as pd
 import pytz
 from ipyleaflet import GeoJSON
 from sepal_ui import model
-from sepal_ui.planetapi import PlanetModel
 from sepal_ui.scripts.utils import random_string
 from shapely.geometry import Polygon
 from tqdm.auto import tqdm
@@ -18,6 +17,7 @@ from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
 import component.scripts as scripts
+from component.planetapi import PlanetModel
 
 
 class AlertModel(model.Model):

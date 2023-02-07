@@ -5,13 +5,13 @@ import ipyvuetify as v
 import pandas as pd
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import TileLayer
-from sepal_ui.planetapi.planet_view import PlanetView as PV
 from shapely.geometry import Point
 from shapely_geojson import dumps
 
 import component.parameter as param
 from component.message import cm
 from component.model import AlertModel
+from component.planetapi.planet_view import PlanetView as PV
 
 __all__ = ["PlanetView"]
 
