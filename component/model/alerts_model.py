@@ -17,11 +17,10 @@ from traitlets import Any, Bool, Int, Unicode, observe
 
 import component.parameter as param
 import component.scripts as scripts
-from component.planetapi import PlanetModel
+from sepal_ui.planetapi import PlanetModel
 
 
 class AlertModel(model.Model):
-
     # If changed, propagate the status to all the tiles that are listening.
     reset = Bool(False).tag(sync=True)
 
@@ -51,7 +50,6 @@ class AlertModel(model.Model):
     "str: number of offset days after the start date. for historic queries."
 
     def __init__(self, *args, **kwargs):
-
         super().__init__(*args, **kwargs)
 
         # Alerts
