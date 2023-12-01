@@ -27,7 +27,6 @@ class AlertsTile(sw.ExpansionPanels):
     as well as the process to request the alerts from the FIRMS API"""
 
     def __init__(self, model, aoi, planet, map_):
-
         self.v_model = 0
 
         super().__init__()
@@ -45,7 +44,6 @@ class AlertsTile(sw.ExpansionPanels):
 
 class AuthenticationView(sw.ExpansionPanel):
     def __init__(self, model, panels, alerts_view):
-
         super().__init__()
 
         self.model = model
@@ -107,7 +105,7 @@ class AuthenticationView(sw.ExpansionPanel):
         self.w_firms_api_key.toggle_viz()
         self.w_firms_api_key.v_model = ""
 
-    @loading_button(debug=True)
+    @loading_button()
     def authenticate_event(self, *args):
         """Trigger authentication process"""
 
@@ -141,7 +139,6 @@ class AuthenticationView(sw.ExpansionPanel):
 
 class AlertsView(sw.ExpansionPanel):
     def __init__(self, model, aoi, map_, planet):
-
         self.disabled = True
 
         super().__init__()
@@ -262,7 +259,7 @@ class AlertsView(sw.ExpansionPanel):
             self.w_historic.show()
             self.w_timespan.hide()
 
-    @loading_button(debug=True)
+    @loading_button()
     def get_alerts(self, widget, change, data):
         """
         Get the corresponding alerts clipped to the area of interest
@@ -298,7 +295,6 @@ class AlertsView(sw.ExpansionPanel):
         # into the map
 
         if len(self.model.aoi_alerts) <= param.MAX_ALERTS:
-
             # Update map dropdown alerts
             self.map_.w_alerts.items = list(self.model.aoi_alerts.index)
             self.map_.w_alerts.w_conf.items = self.model.get_confidence_items()
@@ -355,7 +351,6 @@ class AlertsView(sw.ExpansionPanel):
                 ].index.to_list()
 
             else:
-
                 upper, lower = scripts.get_thresholds(lower=confidence)
                 self.map_.w_alerts.items = self.model.aoi_alerts[
                     (self.model.aoi_alerts.confidence <= upper)
@@ -423,7 +418,6 @@ class WidgetHistoric(sw.Layout):
     the historic data. The widget allow to capture and perform the user interactions."""
 
     def __init__(self, model):
-
         self.model = model
         self.class_ = "d-flex"
         self.align_center = True
@@ -471,7 +465,6 @@ class WidgetHistoric(sw.Layout):
         dates in the date_picker."""
 
         if self.model.availability is not None:
-
             # Get the picker as it is embbeded into the menu that wraps the widget.
             data = self.model.availability
             _, self.w_date.date_picker.min, self.w_date.date_picker.max = (
