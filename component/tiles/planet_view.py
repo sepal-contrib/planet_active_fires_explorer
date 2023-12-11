@@ -11,7 +11,7 @@ from shapely_geojson import dumps
 import component.parameter as param
 from component.message import cm
 from component.model import AlertModel
-from component.planetapi.planet_view import PlanetView as PV
+from sepal_ui.planetapi.planet_view import PlanetView as PV
 
 __all__ = ["PlanetView"]
 
@@ -26,7 +26,6 @@ CHIPS = {
 
 class CustomPanel(sw.ExpansionPanel):
     def __init__(self, model, widgets):
-
         # link with model
         self.model = model
         self.title = f"{cm.planet.advanced_title}: "
@@ -81,7 +80,6 @@ class PlanetView(sw.Card):
     """
 
     def __init__(self, model, map_, *args, **kwargs):
-
         super().__init__(**kwargs)
 
         self.model = model
@@ -258,7 +256,6 @@ class PlanetView(sw.Card):
             return
 
         if self.validate_state_bar():
-
             self.map_.w_state_bar.add_msg(cm.map.status.searching_planet, loading=True)
 
             items = self._get_items()
@@ -285,7 +282,6 @@ class PlanetView(sw.Card):
                     self.map_ + layer
 
     def validate_state_bar(self):
-
         if not self.model.planet_model.active:
             self.map_.w_state_bar.add_msg(cm.planet.no_key, loading=False)
 
