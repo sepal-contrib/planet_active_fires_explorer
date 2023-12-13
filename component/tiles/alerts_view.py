@@ -208,7 +208,7 @@ class AlertsView(sw.ExpansionPanel):
         ]
 
         # Decorate buttons
-        self.write_alerts = su.loading_button(self.alert, self.download_btn, True)(
+        self.write_alerts = su.loading_button(self.alert, self.download_btn)(
             self.write_alerts
         )
 
