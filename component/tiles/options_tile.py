@@ -1,16 +1,14 @@
 import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 
-from component.model import AlertModel
 from component.tiles import AlertsTile, AoiView
 from component.tiles.planet_view import PlanetView
 from component.widget import Tabs
 
-__all__ = ["PanelTile"]
+__all__ = ["PanelDialog"]
 
 
-class PanelTile(sw.Card):
-
+class PanelDialog(v.Dialog):
     """Panel to incorporate each of the tabs that would be used for the end-
     user to validate their Planet API-key, select and area of interest and
     use whether a fixed short periods or the historical data.
@@ -19,16 +17,15 @@ class PanelTile(sw.Card):
 
     def __init__(self, map_, model, *args, **kwargs):
 
+        super().__init__(*args, **kwargs)
+
         self.min_height = "550px"
         self.min_width = "462px"
         self.max_width = "462px"
         self.max_height = "550px"
-        self.class_ = "pa-2"
-
-        super().__init__(*args, **kwargs)
-
         self.model = model
         self.map_ = map_
+        self.v_model = True
 
         self.close = v.Icon(children=["mdi-close"])
         title = v.CardTitle(children=["Settings", v.Spacer(), self.close])
@@ -43,9 +40,14 @@ class PanelTile(sw.Card):
 
         tabs = Tabs(tabs_title, widgets)
 
-        self.children = [title, tabs]
+        self.children = [
+            v.Card(
+                class_="pa-2",
+                children=[title, tabs],
+            )
+        ]
 
-        self.close.on_event("click", lambda *args: self.hide())
+        # self.close.on_event("click", setattr(self, "v_model", False))
 
         # Open dialog when map parameters button is clicked
         self.map_.parameters_btn.on_event("click", self.parameters_btn_event)
@@ -55,7 +57,7 @@ class PanelTile(sw.Card):
         visible
         """
 
-        self.toggle_viz()
+        self.v_model = not self.v_model
 
         if self.viz == True:
             self.map_.metadata_table.hide()

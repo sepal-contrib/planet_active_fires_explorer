@@ -1,5 +1,5 @@
 from ipyleaflet import Marker, WidgetControl
-from ipywidgets import Button, Layout, Output
+from component.tiles.options_tile import PanelDialog
 from sepal_ui import color
 from sepal_ui import mapping as m
 from sepal_ui import sepalwidgets as sw
@@ -18,6 +18,7 @@ class AlertMap(m.SepalMap):
         self.lat = None
         self.lon = None
         self.min_zoom = 2
+        self.add_class("full-screen-map")
 
         kwargs["dc"] = True
         kwargs["gee"] = False
@@ -26,10 +27,6 @@ class AlertMap(m.SepalMap):
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(
-            m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
-        )
-
         self.reload_btn = m.MapBtn("fa-solid fa-sync-alt")
         self.parameters_btn = m.MapBtn("fa-solid fa-bars")
         self.navigate_btn = m.MapBtn("fa-solid fa-fire")
@@ -65,6 +62,9 @@ class AlertMap(m.SepalMap):
 
         self.metadata_table.observe(self.model.metadata_change, "validate")
         self.metadata_table.observe(self.model.metadata_change, "observ")
+
+        self.panel_dialog = PanelDialog(map_=self, model=self.model)
+        self.add_widget_as_control(self.panel_dialog, "topright")
 
     def reset(self, change):
         """Remove all alerts from the map view"""
