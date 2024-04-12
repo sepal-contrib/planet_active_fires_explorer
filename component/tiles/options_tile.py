@@ -42,12 +42,11 @@ class PanelDialog(v.Dialog):
 
         self.children = [
             v.Card(
-                class_="pa-2",
                 children=[title, tabs],
             )
         ]
 
-        # self.close.on_event("click", setattr(self, "v_model", False))
+        self.close.on_event("click", lambda *x: setattr(self, "v_model", False))
 
         # Open dialog when map parameters button is clicked
         self.map_.parameters_btn.on_event("click", self.parameters_btn_event)

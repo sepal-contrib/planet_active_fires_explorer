@@ -19,6 +19,7 @@ class AoiView(v.Card):
 
         self.model = model
         self.map_ = map_
+        self.class_ = "pa-2"
 
         super().__init__(*args, **kwargs)
 
