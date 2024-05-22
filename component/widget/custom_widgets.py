@@ -15,7 +15,6 @@ __all__ = [
 
 
 class DynamicSelect(sw.Card):
-
     """Widget to navigate with next and previous buttons over a list
 
     Args:
@@ -156,7 +155,6 @@ class Tabs(sw.Card):
     def __init__(self, titles, content, **kwargs):
 
         self.background_color = "primary"
-        self.dark = True
 
         self.tabs = [
             v.Tabs(
