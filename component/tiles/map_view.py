@@ -38,7 +38,6 @@ class AlertMap(m.SepalMap):
         self.w_alerts = cw.DynamicSelect(disabled=True).hide()
 
         self.w_state_bar = sw.StateBar(loading=False)
-        self.w_state_bar.color = color.darker
 
         self.metadata_table = cw.MetadataTable()
 
