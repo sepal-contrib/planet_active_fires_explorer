@@ -14,7 +14,7 @@ __all__ = ["AoiView"]
 COUNTRIES = gpd.read_file(param.COUNTRIES_JSON)
 
 
-class AoiView(v.Card):
+class AoiView(v.Flex):
     def __init__(self, model, map_, *args, **kwargs):
 
         self.model = model
