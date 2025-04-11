@@ -1,6 +1,4 @@
 from ipyleaflet import Marker, WidgetControl
-from ipywidgets import Button, Layout, Output
-from sepal_ui import color
 from sepal_ui import mapping as m
 from sepal_ui import sepalwidgets as sw
 
@@ -22,16 +20,14 @@ class AlertMap(m.SepalMap):
         kwargs["dc"] = True
         kwargs["gee"] = False
         kwargs["statebar"] = False
+        kwargs["fullscreen"] = True
+        kwargs["min_zoom"] = 3
 
         super().__init__(*args, **kwargs)
 
         self.show_dc()
-        self.add_control(
-            m.FullScreenControl(self, position="topleft", fullscreen=True, fullapp=True)
-        )
 
         self.reload_btn = m.MapBtn("fa-solid fa-sync-alt")
-        self.parameters_btn = m.MapBtn("fa-solid fa-bars")
         self.navigate_btn = m.MapBtn("fa-solid fa-fire")
         self.metadata_btn = m.MapBtn("fa-solid fa-info-circle")
 
@@ -44,7 +40,6 @@ class AlertMap(m.SepalMap):
         # Add widget as control to the map
         self.add_widget_as_control(self.reload_btn, "topright", first=True)
         self.add_widget_as_control(self.navigate_btn, "topright", first=True)
-        self.add_widget_as_control(self.parameters_btn, "topleft")
         self.add_widget_as_control(self.w_alerts, "topright", first=True)
         self.add_widget_as_control(self.w_state_bar, "topleft", first=True)
         self.add_widget_as_control(self.metadata_btn, "topleft")
@@ -146,30 +141,3 @@ class AlertMap(m.SepalMap):
                 marker.__setattr__("_metadata", {"type": "manual", "id": None})
 
                 self.add_layer(marker)
-
-    def set_code(self, link):
-        "add the code link btn to the map"
-
-        btn = m.MapBtn("fa-solid fa-code", href=link, target="_blank")
-        control = WidgetControl(widget=btn, position="bottomleft")
-        self.add_control(control)
-
-        return
-
-    def set_wiki(self, link):
-        "add the wiki link btn to the map"
-
-        btn = m.MapBtn("fa-solid fa-book-open", href=link, target="_blank")
-        control = WidgetControl(widget=btn, position="bottomleft")
-        self.add_control(control)
-
-        return
-
-    def set_issue(self, link):
-        "add the code link btn to the map"
-
-        btn = m.MapBtn("fa-solid fa-bug", href=link, target="_blank")
-        control = WidgetControl(widget=btn, position="bottomleft")
-        self.add_control(control)
-
-        return
