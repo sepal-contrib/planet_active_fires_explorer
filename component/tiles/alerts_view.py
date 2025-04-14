@@ -1,15 +1,12 @@
-import datetime
 import os
-
+from traitlets import Bool
 import ipyvuetify as v
-import pandas as pd
-import pytz
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON
 from numpy import float64
 from sepal_ui import color
 from sepal_ui.scripts import utils as su
-from sepal_ui.scripts.decorator import loading_button, switch
+from sepal_ui.scripts.decorator import loading_button
 from sepal_ui.scripts.warning import SepalWarning
 from traitlets import link
 
@@ -26,8 +23,11 @@ class AlertsTile(sw.ExpansionPanels):
     """Alerts tile component is the tab where the firms authentication process is done
     as well as the process to request the alerts from the FIRMS API"""
 
+    loading = Bool(False).tag(sync=True)
+
     def __init__(self, model, aoi, planet, map_):
         self.v_model = 0
+        self.loading = True
 
         super().__init__()
 
@@ -40,6 +40,12 @@ class AlertsTile(sw.ExpansionPanels):
         self.authstep_view = AuthenticationView(self.model, self, self.alertsstep_view)
 
         self.children = [self.authstep_view, self.alertsstep_view]
+
+        # Bind the loading button to the loading attribute
+        self.alertsstep_view.btn.observe(self.loading_button, "loading")
+
+    def loading_button(self, change):
+        self.loading = change["new"]
 
 
 class AuthenticationView(sw.ExpansionPanel):
