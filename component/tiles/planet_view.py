@@ -140,7 +140,6 @@ class PlanetView(v.Flex):
         ).bind(self.w_max_images, "max_images").bind(self.w_cloud_cover, "cloud_cover")
 
         self.children = [
-            v.CardTitle(children=[cm.planet.card_title]),
             self.w_planet_view,
             self.w_api_alert,
             self.panels,

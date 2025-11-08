@@ -64,3 +64,45 @@ METADATA_ROWS = {
     "reviewed": cm.alerts.metadata.reviewed,
     "observ": cm.alerts.metadata.observation,
 }
+
+GEE_SOURCES = {
+    "MODIS": {
+        "asset_id": "FIRMS",
+        "scale": 926,
+        "bands": ["T21", "confidence", "line_number"],
+        "start_date": "2000-11-01",
+        "end_date": None,  # present
+    },
+    "VIIRS_SNPP": {
+        "asset_id": "NASA/LANCE/SNPP_VIIRS/C2",
+        "scale": 926,
+        "bands": [
+            "Bright_ti4",
+            "Bright_ti5",
+            "Confidence",
+            "line_number",
+            "frp",
+            "acq_epoch",
+            "acq_time",
+            "DayNight",
+        ],
+        "start_date": "2023-09-03",
+        "end_date": None,  # present
+    },
+    "VIIRS_NOAA20": {
+        "asset_id": "NASA/LANCE/NOAA20_VIIRS/C2",
+        "scale": 926,
+        "bands": [
+            "Bright_ti4",
+            "Bright_ti5",
+            "confidence",
+            "line_number",
+            "frp",
+            "acq_epoch",
+            "acq_time",
+            "DayNight",
+        ],
+        "start_date": "2023-10-08",
+        "end_date": None,  # present
+    },
+}

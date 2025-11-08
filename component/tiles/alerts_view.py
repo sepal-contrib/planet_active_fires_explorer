@@ -25,7 +25,7 @@ class AlertsTile(sw.ExpansionPanels):
 
     loading = Bool(False).tag(sync=True)
 
-    def __init__(self, model, aoi, planet, map_):
+    def __init__(self, model, aoi, map_):
         self.v_model = 0
         self.loading = True
 
@@ -34,9 +34,8 @@ class AlertsTile(sw.ExpansionPanels):
         self.model = model
         self.aoi = aoi
         self.map_ = map_
-        self.planet = planet
 
-        self.alertsstep_view = AlertsView(self.model, self.aoi, self.map_, self.planet)
+        self.alertsstep_view = AlertsView(self.model, self.aoi, self.map_)
         self.authstep_view = AuthenticationView(self.model, self, self.alertsstep_view)
 
         self.children = [self.authstep_view, self.alertsstep_view]
@@ -144,7 +143,7 @@ class AuthenticationView(sw.ExpansionPanel):
 
 
 class AlertsView(sw.ExpansionPanel):
-    def __init__(self, model, aoi, map_, planet):
+    def __init__(self, model, aoi, map_):
         self.disabled = True
 
         super().__init__()
@@ -152,7 +151,6 @@ class AlertsView(sw.ExpansionPanel):
         self.model = model
         self.aoi = aoi
         self.map_ = map_
-        self.planet = planet
         self.alert = sw.Alert()
 
         self.w_header = sw.ExpansionPanelHeader(children=[cm.alerts.steps.alerts])
@@ -413,9 +411,9 @@ class AlertsView(sw.ExpansionPanel):
             self.map_.zoom = 15
             self._get_metadata(self.model.current_alert)
 
-            # Search and add layers to map
-            if self.model.planet_model.active:
-                self.planet.add_planet_imagery()
+            # # Search and add layers to map
+            # if self.model.planet_model.active:
+            #     self.planet.add_planet_imagery()
 
 
 class WidgetHistoric(sw.Layout):

@@ -9,7 +9,7 @@ __all__ = ["AlertMap"]
 
 
 class AlertMap(m.SepalMap):
-    def __init__(self, model, *args, **kwargs):
+    def __init__(self, model, theme_toggle, *args, **kwargs):
 
         self.model = model
 
@@ -23,7 +23,9 @@ class AlertMap(m.SepalMap):
         kwargs["fullscreen"] = True
         kwargs["min_zoom"] = 3
 
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, theme_toggle=theme_toggle, **kwargs)
+
+        self.add_basemap("SATELLITE")
 
         self.show_dc()
 
