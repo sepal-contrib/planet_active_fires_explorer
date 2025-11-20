@@ -5,20 +5,16 @@ import ipyvuetify as v
 import sepal_ui.sepalwidgets as sw
 from ipyleaflet import GeoJSON
 from sepal_ui.scripts import utils as su
-from traitlets import Bool
+
 import component.parameter as param
 from component.message import cm
-from component.scripts.logger import logger
 
 __all__ = ["AoiView"]
 
 COUNTRIES = gpd.read_file(param.COUNTRIES_JSON)
 
 
-class AoiView(v.Flex):
-
-    close_dialog = Bool(False).tag(sync=True)
-
+class AoiView(v.Card):
     def __init__(self, model, map_, *args, **kwargs):
 
         self.model = model
@@ -34,7 +30,7 @@ class AoiView(v.Flex):
 
         self.w_aoi_method = sw.Select(
             label=cm.ui.aoi_method,
-            v_model="country",
+            v_model="draw",
             items=[
                 {"text": cm.aoi.method.draw, "value": "draw"},
                 {"text": cm.aoi.method.country, "value": "country"},
@@ -59,10 +55,8 @@ class AoiView(v.Flex):
 
     def aoi_method_event(self, change):
         """Toggle components"""
-        logger.info("aoi_method_event", change)
 
         self.map_.remove_all()
-        self.close_dialog = False
 
         if change["new"] == "country":
             self.map_.dc.hide()
@@ -72,7 +66,6 @@ class AoiView(v.Flex):
             su.hide_component(self.w_countries)
             self.w_countries.v_model = ""
             self.map_.dc.show()
-            self.close_dialog = True
 
     def add_country_event(self, change):
         """Add the selected country in the map"""

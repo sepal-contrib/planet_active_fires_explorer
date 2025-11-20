@@ -69,7 +69,8 @@ class CustomPanel(sw.ExpansionPanel):
         self.header.children = [self.title] + chips
 
 
-class PlanetView(v.Flex):
+class PlanetView(sw.Card):
+
     """Stand-alone component to get the user planet inputs and validate its
     configuration.
 
@@ -140,6 +141,7 @@ class PlanetView(v.Flex):
         ).bind(self.w_max_images, "max_images").bind(self.w_cloud_cover, "cloud_cover")
 
         self.children = [
+            v.CardTitle(children=[cm.planet.card_title]),
             self.w_planet_view,
             self.w_api_alert,
             self.panels,
@@ -164,10 +166,8 @@ class PlanetView(v.Flex):
         """Toggle planet widgets depending on the planet widget authentication"""
 
         for w in self.components:
-            (
-                setattr(w, "disabled", False)
-                if change["new"]
-                else setattr(w, "disabled", True)
+            setattr(w, "disabled", False) if change["new"] else setattr(
+                w, "disabled", True
             )
 
     def _get_items(self):
