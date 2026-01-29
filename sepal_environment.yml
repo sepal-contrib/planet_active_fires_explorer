@@ -15,6 +15,7 @@ dependencies:
   - gdal=3.8.3
   - pip
   - pip:
-    - sepal_ui==2.21.0
-    - git+https://github.com/openforis/earthengine-api.git@v1.1.5rc0#subdirectory=python
-    - shapely-geojson
+      - sepal_ui==2.21.0
+      - git+https://github.com/openforis/earthengine-api.git@v1.1.5rc0#subdirectory=python
+      - shapely-geojson
+      - rasterio<=1.4.3
