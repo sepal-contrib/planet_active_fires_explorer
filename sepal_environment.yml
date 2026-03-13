@@ -5,6 +5,7 @@ channels:
 
 dependencies:
   - python=3.10
+  - sepal-ui>=2.22.1,<3
   - numpy
   - pandas
   - requests
@@ -15,7 +16,6 @@ dependencies:
   - gdal=3.8.3
   - pip
   - pip:
-      - sepal_ui==2.21.0
       - git+https://github.com/openforis/earthengine-api.git@v1.1.5rc0#egg=earthengine-api&subdirectory=python
       - shapely-geojson
       - rasterio<=1.4.3
